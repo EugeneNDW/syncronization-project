@@ -1,8 +1,6 @@
 application:
   name: "Files sync application"
   credentials.file.path: "/credentials.json"
-  service.email: "images-bot@drive-bot-353001.iam.gserviceaccount.com"
-  token.directory.path: "tokens"
   token.refresh: "${TOKEN_REFRESH}"
 spring:
   servlet:

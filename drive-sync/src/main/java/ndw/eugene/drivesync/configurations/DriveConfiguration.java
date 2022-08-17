@@ -36,12 +36,8 @@ public class DriveConfiguration {
     public DriveConfiguration(
             @Value("${application.name}")
             String applicationName,
-            @Value("${application.token.directory.path}")
-            String tokensDirectoryPath,
             @Value("${application.credentials.file.path}")
             String credentialsFilePath,
-            @Value("${application.service.email}")
-            String serviceEmail,
             @Value("${token.refresh}")
             String tokenRefresh) {
         this.applicationName = applicationName;
