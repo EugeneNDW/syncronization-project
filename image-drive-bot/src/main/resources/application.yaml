@@ -1,0 +1,23 @@
+application:
+  telegrambot.token: "5577308220:AAF_7V9rIcSrZXRJgpzK2AbNoEznj14NvHg"
+  driveservice.url: "drivesync:8080/drive/files"
+
+spring:
+  main:
+    web-application-type: none
+
+chat:
+  id: "-1001416816634"
+  name: "Балкон"
+  dima:
+    id: "41809406"
+    name: "Дима"
+  knshnkn:
+    id: "136094717"
+    name: "Коношонкин"
+  olga:
+    id: "115364294"
+    name: "Ольга"
+  yenya:
+    id: "95263058"
+    name: "Женя"
