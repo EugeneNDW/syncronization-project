@@ -37,3 +37,4 @@ out/
 
 #module-specific
 /drive-sync/src/main/resources/credentials.json
+*.env

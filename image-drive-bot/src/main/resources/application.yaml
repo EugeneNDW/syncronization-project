@@ -1,6 +1,6 @@
 application:
   telegrambot.token: "5577308220:AAF_7V9rIcSrZXRJgpzK2AbNoEznj14NvHg"
-  driveservice.url: "http://localhost:8080/drive/files"
+  driveservice.url: "http://synchronization-back:8080/drive/files"
 
 spring:
   main:

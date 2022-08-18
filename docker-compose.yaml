@@ -1,0 +1,22 @@
+version: "3"
+services:
+  synchronization-back:
+    image: synchronization-back
+    build:
+      dockerfile: Dockerfile
+      context: ./drive-sync
+    container_name: synchronization-back
+    env_file:
+      - drive-sync/src/main/resources/.env
+  synchronization-bot:
+    image: synchronization-bot
+    build:
+      dockerfile: Dockerfile
+      context: ./image-drive-bot
+    container_name: synchronization-bot
+    depends_on:
+      - synchronization-back
+
+
+
+
