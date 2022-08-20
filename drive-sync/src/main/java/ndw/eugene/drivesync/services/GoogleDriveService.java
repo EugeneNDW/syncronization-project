@@ -33,10 +33,16 @@ public class GoogleDriveService implements IGoogleDriveService {
 
     @Override
     public File uploadFIle(java.io.File filePath, FileInfoDto fileInfoDto) {
+        //todo проверяем что чат зарегистрирован и у него есть папка
+        //todo проверяем что у пользователя есть папка
+        //todo получаем папку, пишем туда
         var metadata = new File();
         metadata.setParents(Collections.singletonList(DIRECTORY_ID));
         metadata.setName(filePath.getName());
-        metadata.setDescription(fileInfoDto.name() + " " + fileInfoDto.resource());
+        metadata.setDescription(
+                fileInfoDto.name() + " "
+                + fileInfoDto.description() + " "
+                + fileInfoDto.resource());
 
         FileContent mediaContent = fileToFileContent(filePath);
 
@@ -47,6 +53,8 @@ public class GoogleDriveService implements IGoogleDriveService {
                     .execute();
 
             System.out.println("File ID: " + gdFile.getId());
+
+            //todo записываем в базу то что файл загрузили.
             return gdFile;
         } catch (IOException e) {
             throw new DriveException(e);

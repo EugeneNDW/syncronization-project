@@ -18,6 +18,7 @@ public class BotConfiguration {
 
     private final String botToken;
 
+    public static final String RESOURCE_NAME = "TELEGRAM";
     public BotConfiguration(@Value("${application.telegrambot.token}") String botToken) {
         this.botToken = botToken;
     }

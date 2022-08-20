@@ -15,6 +15,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ScheduledFuture;
 
+import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.RESOURCE_NAME;
+
 public class PhotoUploadConversationProcessor {
     private final int WAIT_FOR_UPDATES_LIMIT_IN_SEC = 30;
     private final PhotoUploadConversationState conversationState = new PhotoUploadConversationState();
@@ -116,14 +118,15 @@ public class PhotoUploadConversationProcessor {
     private ScheduledFuture<?> schedulePhotoUpload(Update update, DriveSyncBot bot) {
         return scheduler.schedule(() -> {
             isTaskDone = true;
-
+            Long chatId = update.getMessage().getChatId();
+            Long userId = update.getMessage().getFrom().getId();
             SendMessage m = new SendMessage();
-            m.setChatId(update.getMessage().getChatId() + "");
+            m.setChatId(chatId + "");
             m.setText("загружено:" + photosData.getUploadedFiles().size() + " фотографий");
 
             photosData.getUploadedFiles()
                     .forEach(f ->
-                            fileService.sendFileToDisk(f, new FileInfoDto(f.getName(), photosData.getDescription()))
+                            fileService.sendFileToDisk(f, new FileInfoDto(chatId, userId, f.getName(), photosData.getDescription(), RESOURCE_NAME))
                     );
 
             bot.sendMessage(m);
