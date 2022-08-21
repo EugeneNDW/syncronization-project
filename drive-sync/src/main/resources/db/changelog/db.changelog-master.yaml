@@ -37,3 +37,36 @@ databaseChangeLog:
                   type: text
                   constraints:
                     nullable: false
+
+  - changeSet:
+      id: 2
+      author: eugenendw
+      changes:
+        - createTable:
+            tableName: drive_folder
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: chat_id
+                  type: bigint
+                  constraints:
+                    - unique: true
+
+              - column:
+                  name: title
+                  type: text
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: folder_id
+                  type: text
+                  constraints:
+                    nullable: false

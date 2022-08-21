@@ -18,36 +18,33 @@ import java.util.List;
 
 @Service
 public class GoogleDriveService implements IGoogleDriveService {
-    private static final String DIRECTORY_ID = "1TMpuJgnXmr8tDiUzjlGPopA1xgWd8JX-";
-
     @Autowired
     private final IFileInfoService fileInfoService;
+
+    @Autowired
+    private final IFolderService folderService;
+
     @Autowired
     private final Drive drive;
+
     @Autowired
     private final Tika tika;
 
     public GoogleDriveService(final IFileInfoService fileInfoService,
+                              final IFolderService folderService,
                               final Drive drive,
                               final Tika tika) {
         this.fileInfoService = fileInfoService;
+        this.folderService = folderService;
         this.drive = drive;
         this.tika = tika;
     }
 
     @Override
     public File uploadFIle(java.io.File filePath, FileInfoDto fileInfoDto) {
-        //todo проверяем что чат зарегистрирован и у него есть папка
-        //todo проверяем что у пользователя есть папка
-        //todo получаем папку, пишем туда
-        var metadata = new File();
-        metadata.setParents(Collections.singletonList(DIRECTORY_ID));
-        metadata.setName(filePath.getName());
-        metadata.setDescription(
-                fileInfoDto.name() + " "
-                + fileInfoDto.description() + " "
-                + fileInfoDto.resource());
+        var folderId = folderService.getFolderByChatId(fileInfoDto.chatId());
 
+        File metadata = createMetadataFromFileInfo(filePath, fileInfoDto, folderId.getFolderId());
         FileContent mediaContent = fileToFileContent(filePath);
 
         try {
@@ -58,12 +55,9 @@ public class GoogleDriveService implements IGoogleDriveService {
 
             System.out.println("File ID: " + gdFile.getId());
 
-            FileInfo fileInfo = new FileInfo();
-            fileInfo.setDescription(fileInfoDto.description());
-            fileInfo.setSource(fileInfoDto.resource());
-            fileInfo.setFileId(gdFile.getId());
-            fileInfo.setUserId(fileInfoDto.userId());
+            FileInfo fileInfo = createFileInfo(fileInfoDto, gdFile);
             fileInfoService.saveFileInfo(fileInfo);
+
             return gdFile;
         } catch (IOException e) {
             throw new DriveException(e);
@@ -115,5 +109,25 @@ public class GoogleDriveService implements IGoogleDriveService {
                 System.out.printf("%s (%s)\n", file.getName(), file.getId());
             }
         }
+    }
+
+    private FileInfo createFileInfo(FileInfoDto fileInfoDto, File gdFile) {
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setDescription(fileInfoDto.description());
+        fileInfo.setSource(fileInfoDto.resource());
+        fileInfo.setFileId(gdFile.getId());
+        fileInfo.setUserId(fileInfoDto.userId());
+        return fileInfo;
+    }
+
+    private File createMetadataFromFileInfo(java.io.File filePath, FileInfoDto fileInfoDto, String folderId) {
+        var metadata = new File();
+        metadata.setParents(Collections.singletonList(folderId));
+        metadata.setName(filePath.getName());
+        metadata.setDescription(
+                fileInfoDto.name() + " "
+                        + fileInfoDto.description() + " "
+                        + fileInfoDto.resource());
+        return metadata;
     }
 }

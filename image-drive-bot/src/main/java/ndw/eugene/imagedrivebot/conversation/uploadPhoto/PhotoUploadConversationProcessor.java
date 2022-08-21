@@ -86,6 +86,12 @@ public class PhotoUploadConversationProcessor {
                 throw new DocumentNotFoundException("Не удалось найти документ в сообщении. Возможно вы не прикрепили фотографии, либо прикрепили фотографии со сжатием, попробуйте ещё раз");
             }
             var updateMediaGroup = message.getMediaGroupId();
+
+            boolean documentFromAnotherGroup = mediaGroupId != null && !mediaGroupId.equals(updateMediaGroup);
+            if (documentFromAnotherGroup) {
+                return;
+            }
+
             File file;
             try {
                 file = bot.downloadFile(document);
@@ -93,7 +99,6 @@ public class PhotoUploadConversationProcessor {
                 throw new RuntimeException(e); //todo костыль, подумать когда скачивать файлы и что делать с ошибкой.
             }
             photosData.addFile(file);
-
             if (mediaGroupId == null) {
                 if (updateMediaGroup != null) {
                     mediaGroupId = updateMediaGroup;
@@ -122,13 +127,13 @@ public class PhotoUploadConversationProcessor {
             Long userId = update.getMessage().getFrom().getId();
             SendMessage m = new SendMessage();
             m.setChatId(chatId + "");
-            m.setText("загружено:" + photosData.getUploadedFiles().size() + " фотографий");
 
             photosData.getUploadedFiles()
                     .forEach(f ->
                             fileService.sendFileToDisk(f, new FileInfoDto(chatId, userId, f.getName(), photosData.getDescription(), RESOURCE_NAME))
                     );
 
+            m.setText("загружено:" + photosData.getUploadedFiles().size() + " фотографий");
             bot.sendMessage(m);
             nextStage();
         }, Instant.now().plus(WAIT_FOR_UPDATES_LIMIT_IN_SEC, ChronoUnit.SECONDS));
