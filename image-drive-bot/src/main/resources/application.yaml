@@ -9,15 +9,3 @@ spring:
 chat:
   id: "-1001416816634"
   name: "Балкон"
-  dima:
-    id: "41809406"
-    name: "Дима"
-  knshnkn:
-    id: "136094717"
-    name: "Коношонкин"
-  olga:
-    id: "115364294"
-    name: "Ольга"
-  yenya:
-    id: "95263058"
-    name: "Женя"

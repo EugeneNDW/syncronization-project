@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.Set;
 
 import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.*;
 
@@ -22,7 +23,7 @@ public class DriveSyncBot extends TelegramLongPollingBot {
 
     private final ConversationService conversationService;
 
-    private final Long adminId = 95263058L;
+    private final Set<Long> admins = Set.of(41809406L, 136094717L, 115364294L, 95263058L);
 
     public DriveSyncBot(SessionManager sessionManager, String botToken, ConversationService conversationService) {
         this.sessionManager = sessionManager;
@@ -47,7 +48,7 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             Long chatId = incMessage.getChatId();
             Long userId = incMessage.getFrom().getId();
 
-            if (userId.equals(adminId)) {
+            if (admins.contains(userId)) {
                 System.out.println(incMessage.getText());
                 var session = sessionManager.getSessionForUserInChat(userId, chatId);
                 if (session != null) {
