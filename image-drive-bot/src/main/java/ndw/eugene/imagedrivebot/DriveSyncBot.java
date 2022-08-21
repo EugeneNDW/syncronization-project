@@ -13,6 +13,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.util.Objects;
 
+import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.*;
+
 public class DriveSyncBot extends TelegramLongPollingBot {
 
     private final SessionManager sessionManager;
@@ -30,7 +32,7 @@ public class DriveSyncBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "syncfilesbot";
+        return BOT_NAME;
     }
 
     @Override
@@ -54,29 +56,12 @@ public class DriveSyncBot extends TelegramLongPollingBot {
                     processCommand(update);
                 }
             } else {
-                var message = new SendMessage();
-                message.setChatId(update.getMessage().getChatId() + "");
-                message.setText("знакомы?");
-                sendMessage(message);
+                sendMessageToChat(UNAUTHORIZED_MESSAGE, update.getMessage().getChatId());
             }
         } catch (DocumentNotFoundException e) {
-            var message = new SendMessage();
-            message.setChatId(update.getMessage().getChatId() + "");
-            message.setText(e.getMessage());
-            sendMessage(message);
+            sendMessageToChat(e.getMessage(), update.getMessage().getChatId());
         } catch (Exception e) {
-            var message = new SendMessage();
-            message.setChatId(update.getMessage().getChatId() + "");
-            message.setText("что-то случилось, мы всё записали и обязательно разберемся. Попробуйте ещё раз или ещё раз, но позже");
-            sendMessage(message);
-        }
-    }
-
-    public void sendMessage(SendMessage message) {
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+            sendMessageToChat(GENERIC_EXCEPTION_MESSAGE, update.getMessage().getChatId());
         }
     }
 
@@ -86,15 +71,11 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         Long userId = message.getFrom().getId();
 
         String messageText = message.getText();
-        if (Objects.equals(messageText, "/upload")) {
+        if (Objects.equals(messageText, "/start")) {
+            sendMessageToChat(HELLO_MESSAGE, chatId);
+        } else if (Objects.equals(messageText, "/upload")) {
             var session = conversationService.startUploadFileConversation(userId, chatId);
             processSession(update, session);
-        } else {
-            SendMessage m = new SendMessage();
-            m.setChatId(chatId + "");
-            m.setText("произошла обработка команды");
-
-            sendMessage(m);
         }
     }
 
@@ -104,10 +85,8 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         } else {
             sessionManager.removeSession(session);
 
-            SendMessage m = new SendMessage();
-            m.setChatId(update.getMessage().getChatId() + "");
-            m.setText("сессия протухла");
-            sendMessage(m);
+
+            sendMessageToChat(SESSION_EXPIRED_MESSAGE, update.getMessage().getChatId());
         }
     }
 
@@ -117,5 +96,21 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         getFile.setFileId(document.getFileId());
         String filePath = execute(getFile).getFilePath();
         return downloadFile(filePath, outputFile);
+    }
+
+    public void sendMessageToChat(String message, Long chatId) {
+        SendMessage m = new SendMessage();
+        m.setChatId(chatId + "");
+        m.setText(message);
+
+        sendMessage(m);
+    }
+
+    public void sendMessage(SendMessage message) {
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

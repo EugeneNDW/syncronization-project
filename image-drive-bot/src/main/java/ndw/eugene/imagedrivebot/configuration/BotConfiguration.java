@@ -15,10 +15,26 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Configuration
 public class BotConfiguration {
-
+    public static final String SESSION_EXPIRED_MESSAGE = "сессия протухла";
+    public static final String HELLO_MESSAGE = "привет я синхробот синхронизирую файлы";
+    public static final String GENERIC_EXCEPTION_MESSAGE = "что-то случилось, мы всё записали и обязательно " +
+            "разберемся. Попробуйте ещё раз или ещё раз, но позже";
+    public static final String UNAUTHORIZED_MESSAGE = "знакомы?";
+    public static final String UPLOAD_START_MESSAGE = "начинаем загрузку фотографий, " +
+            "введите описание для загружаемых фото," +
+            " либо команду /skip чтобы оставить описание пустым";
+    public static final String UPLOAD_DESCRIPTION_SAVED_MESSAGE = "описание сохранено. теперь загрузите " +
+            "фотографии без сжатия, размером не более 20мб каждая";
+    public static final String DOCUMENT_NOT_FOUND_EXCEPTION_MESSAGE = "Не удалось найти документ в сообщении. " +
+            "Возможно вы не прикрепили фотографии, " +
+            "либо прикрепили фотографии со сжатием, попробуйте ещё раз";
+    public static final String CANT_REACH_EXCEPTION_MESSAGE = "Диалог закончился, " +
+            "сессия должна быть удалена, " +
+            "выполнение не должно доходить до этого момента";
+    public static final String BOT_NAME = "syncfilesbot";
+    public static final String RESOURCE_NAME = "TELEGRAM";
     private final String botToken;
 
-    public static final String RESOURCE_NAME = "TELEGRAM";
     public BotConfiguration(@Value("${application.telegrambot.token}") String botToken) {
         this.botToken = botToken;
     }

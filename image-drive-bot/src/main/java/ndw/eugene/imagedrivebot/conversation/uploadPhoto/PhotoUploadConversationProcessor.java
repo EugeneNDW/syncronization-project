@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ScheduledFuture;
 
-import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.RESOURCE_NAME;
+import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.*;
 
 public class PhotoUploadConversationProcessor {
     private final int WAIT_FOR_UPDATES_LIMIT_IN_SEC = 30;
@@ -60,33 +60,25 @@ public class PhotoUploadConversationProcessor {
         };
     }
 
-    public final UpdateProcessor startProcessor = (update, bot) -> {
-        SendMessage m = new SendMessage();
-        m.setChatId(update.getMessage().getChatId() + "");
-        m.setText("начинаем загрузку фотографий, введите описание для загружаемых фото," +
-                " либо команду /skip чтобы оставить описание пустым");
-        bot.sendMessage(m);
-    };
+    public final UpdateProcessor startProcessor = (update, bot) ->
+            bot.sendMessageToChat(UPLOAD_START_MESSAGE, update.getMessage().getChatId());
 
     public final UpdateProcessor descriptionProcessor = (update, bot) -> {
         var description = update.getMessage().getText();
         var userId = update.getMessage().getFrom().getId();
         photosData.setDescription(description + " " + userId);
-        SendMessage m = new SendMessage();
-        m.setChatId(update.getMessage().getChatId() + "");
-        m.setText("описание сохранено. теперь загрузите фотографии без сжатия, размером не более 20мб каждая");
-        bot.sendMessage(m);
+
+        bot.sendMessageToChat(UPLOAD_DESCRIPTION_SAVED_MESSAGE, update.getMessage().getChatId());
     };
 
     public final UpdateProcessor photosProcessor = (update, bot) -> {
         var message = update.getMessage();
         if (message != null) {
+            var updateMediaGroup = message.getMediaGroupId();
             var document = message.getDocument();
             if (document == null) {
-                throw new DocumentNotFoundException("Не удалось найти документ в сообщении. Возможно вы не прикрепили фотографии, либо прикрепили фотографии со сжатием, попробуйте ещё раз");
+                throw new DocumentNotFoundException(DOCUMENT_NOT_FOUND_EXCEPTION_MESSAGE);
             }
-            var updateMediaGroup = message.getMediaGroupId();
-
             boolean documentFromAnotherGroup = mediaGroupId != null && !mediaGroupId.equals(updateMediaGroup);
             if (documentFromAnotherGroup) {
                 return;
@@ -115,9 +107,7 @@ public class PhotoUploadConversationProcessor {
     };
 
     public final UpdateProcessor endedProcessor = (update, bot) -> {
-        throw new IllegalArgumentException("Диалог закончился, " +
-                "сессия должна быть удалена, " +
-                "выполнение не должно доходить до этого момента");
+        throw new IllegalArgumentException(CANT_REACH_EXCEPTION_MESSAGE);
     };
 
     private ScheduledFuture<?> schedulePhotoUpload(Update update, DriveSyncBot bot) {
@@ -125,16 +115,20 @@ public class PhotoUploadConversationProcessor {
             isTaskDone = true;
             Long chatId = update.getMessage().getChatId();
             Long userId = update.getMessage().getFrom().getId();
-            SendMessage m = new SendMessage();
-            m.setChatId(chatId + "");
+
 
             photosData.getUploadedFiles()
                     .forEach(f ->
-                            fileService.sendFileToDisk(f, new FileInfoDto(chatId, userId, f.getName(), photosData.getDescription(), RESOURCE_NAME))
+                            fileService.sendFileToDisk(f,
+                                    new FileInfoDto(
+                                            chatId,
+                                            userId,
+                                            f.getName(),
+                                            photosData.getDescription(),
+                                            RESOURCE_NAME))
                     );
 
-            m.setText("загружено:" + photosData.getUploadedFiles().size() + " фотографий");
-            bot.sendMessage(m);
+            bot.sendMessageToChat("загружено:" + photosData.getUploadedFiles().size() + " фотографий", chatId);
             nextStage();
         }, Instant.now().plus(WAIT_FOR_UPDATES_LIMIT_IN_SEC, ChronoUnit.SECONDS));
     }
