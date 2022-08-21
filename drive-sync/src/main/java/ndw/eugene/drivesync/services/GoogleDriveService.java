@@ -4,9 +4,9 @@ import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import ndw.eugene.drivesync.data.entities.FileInfo;
 import ndw.eugene.drivesync.dto.FileInfoDto;
 import ndw.eugene.drivesync.exceptions.DriveException;
-import ndw.eugene.drivesync.exceptions.TikaException;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -21,12 +21,16 @@ public class GoogleDriveService implements IGoogleDriveService {
     private static final String DIRECTORY_ID = "1TMpuJgnXmr8tDiUzjlGPopA1xgWd8JX-";
 
     @Autowired
+    private final IFileInfoService fileInfoService;
+    @Autowired
     private final Drive drive;
     @Autowired
     private final Tika tika;
 
-    public GoogleDriveService(final Drive drive,
+    public GoogleDriveService(final IFileInfoService fileInfoService,
+                              final Drive drive,
                               final Tika tika) {
+        this.fileInfoService = fileInfoService;
         this.drive = drive;
         this.tika = tika;
     }
@@ -54,7 +58,12 @@ public class GoogleDriveService implements IGoogleDriveService {
 
             System.out.println("File ID: " + gdFile.getId());
 
-            //todo записываем в базу то что файл загрузили.
+            FileInfo fileInfo = new FileInfo();
+            fileInfo.setDescription(fileInfoDto.description());
+            fileInfo.setSource(fileInfoDto.resource());
+            fileInfo.setFileId(gdFile.getId());
+            fileInfo.setUserId(fileInfoDto.userId());
+            fileInfoService.saveFileInfo(fileInfo);
             return gdFile;
         } catch (IOException e) {
             throw new DriveException(e);

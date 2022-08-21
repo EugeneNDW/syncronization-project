@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: eugenendw
+      changes:
+        - createTable:
+            tableName: file_info
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: file_id
+                  type: text
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: source
+                  type: text
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: text
+                  constraints:
+                    nullable: false

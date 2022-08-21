@@ -1,6 +1,5 @@
 package ndw.eugene.drivesync.services;
 
-import com.google.api.services.drive.model.About;
 import com.google.api.services.drive.model.File;
 import ndw.eugene.drivesync.dto.FileInfoDto;
 
