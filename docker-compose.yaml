@@ -28,9 +28,12 @@ services:
       - drive-sync/src/main/resources/.env
     ports:
       - "5432:5432"
-#    volumes:
-#      - postgres-data:/var/lib/postgresql/data
+    volumes:
+      - postgres-back-data:/var/lib/postgresql/data #default path where postgres search for data
 
+volumes:
+  postgres-back-data: # volume name
+    driver: local # local means that volume is stored on host machine
 
 
 
