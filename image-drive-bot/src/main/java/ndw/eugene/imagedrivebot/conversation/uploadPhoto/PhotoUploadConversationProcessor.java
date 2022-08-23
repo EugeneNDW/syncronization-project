@@ -6,7 +6,7 @@ import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
 import ndw.eugene.imagedrivebot.services.IFileService;
 import org.springframework.scheduling.TaskScheduler;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -64,11 +64,14 @@ public class PhotoUploadConversationProcessor {
             bot.sendMessageToChat(UPLOAD_START_MESSAGE, update.getMessage().getChatId());
 
     public final UpdateProcessor descriptionProcessor = (update, bot) -> {
-        var description = update.getMessage().getText();
-        var userId = update.getMessage().getFrom().getId();
-        photosData.setDescription(description + " " + userId);
+        Message message = update.getMessage();
+        if (message != null) {
+            var description = message.getText() != null ? message.getText() : "";
+            var userId = message.getFrom().getId();
+            photosData.setDescription(description + " " + userId);
 
-        bot.sendMessageToChat(UPLOAD_DESCRIPTION_SAVED_MESSAGE, update.getMessage().getChatId());
+            bot.sendMessageToChat(UPLOAD_DESCRIPTION_SAVED_MESSAGE, message.getChatId());
+        }
     };
 
     public final UpdateProcessor photosProcessor = (update, bot) -> {
@@ -94,13 +97,14 @@ public class PhotoUploadConversationProcessor {
             if (mediaGroupId == null) {
                 if (updateMediaGroup != null) {
                     mediaGroupId = updateMediaGroup;
+                    job = schedulePhotoUpload(update, bot);
+                } else {
+                    sendPhotos(update, bot);
                 }
-                job = schedulePhotoUpload(update, bot);
             } else if (mediaGroupId.equals(updateMediaGroup)) {
                 if (job != null) {
                     job.cancel(false);
                 }
-
                 job = schedulePhotoUpload(update, bot);
             }
         }
@@ -112,24 +116,26 @@ public class PhotoUploadConversationProcessor {
 
     private ScheduledFuture<?> schedulePhotoUpload(Update update, DriveSyncBot bot) {
         return scheduler.schedule(() -> {
-            isTaskDone = true;
-            Long chatId = update.getMessage().getChatId();
-            Long userId = update.getMessage().getFrom().getId();
-
-
-            photosData.getUploadedFiles()
-                    .forEach(f ->
-                            fileService.sendFileToDisk(f,
-                                    new FileInfoDto(
-                                            chatId,
-                                            userId,
-                                            f.getName(),
-                                            photosData.getDescription(),
-                                            RESOURCE_NAME))
-                    );
-
-            bot.sendMessageToChat("загружено:" + photosData.getUploadedFiles().size() + " фотографий", chatId);
-            nextStage();
+            sendPhotos(update, bot);
         }, Instant.now().plus(WAIT_FOR_UPDATES_LIMIT_IN_SEC, ChronoUnit.SECONDS));
+    }
+
+    private void sendPhotos(Update update, DriveSyncBot bot) {
+        isTaskDone = true;
+        Long chatId = update.getMessage().getChatId();
+        Long userId = update.getMessage().getFrom().getId();
+        photosData.getUploadedFiles()
+                .forEach(f ->
+                        fileService.sendFileToDisk(f,
+                                new FileInfoDto(
+                                        chatId,
+                                        userId,
+                                        f.getName(),
+                                        photosData.getDescription(),
+                                        RESOURCE_NAME))
+                );
+
+        bot.sendMessageToChat("загружено:" + photosData.getUploadedFiles().size() + " фотографий", chatId);
+        nextStage();
     }
 }
