@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PhotoUploadData {
+
     private final List<File> uploadedFiles = new ArrayList<>();
+
     private String description;
 
     public void addFile(File file) {

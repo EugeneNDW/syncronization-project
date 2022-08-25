@@ -5,11 +5,17 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class FormattedUpdate {
+
     private long chatId;
+
     private long userId;
+
     private String messageText;
+
     private String mediaGroupId;
+
     private final Message message;
+
     private Document document;
 
     //we don't check nullability of message and getFrom() because we consider such updates as invalid and won't process them.
