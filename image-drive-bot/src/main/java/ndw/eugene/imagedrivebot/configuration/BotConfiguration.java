@@ -15,8 +15,8 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Configuration
 public class BotConfiguration {
-    public static final String SESSION_EXPIRED_MESSAGE = "сессия протухла";
-    public static final String HELLO_MESSAGE = "привет я синхробот синхронизирую файлы";
+    public static final String SESSION_EXPIRED_MESSAGE = "сессия протухла, чтобы начать новую введите: /update";
+    public static final String HELLO_MESSAGE = "привет, я синхробот синхронизирую файлы";
     public static final String GENERIC_EXCEPTION_MESSAGE = "что-то случилось, мы всё записали и обязательно " +
             "разберемся. Попробуйте ещё раз или ещё раз, но позже";
     public static final String UNAUTHORIZED_MESSAGE = "знакомы?";
