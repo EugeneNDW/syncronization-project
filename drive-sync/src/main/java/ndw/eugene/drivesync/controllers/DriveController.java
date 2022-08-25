@@ -23,7 +23,7 @@ public class DriveController {
     @PostMapping("/files")
     public String uploadFiles(@RequestPart("file") MultipartFile file,
                               @RequestPart(value = "fileInfo") FileInfoDto fileInfo) throws IOException {
-        java.io.File tmpFile = multipartToFile(file);
+        java.io.File tmpFile = multipartToFile(file, fileInfo.name());
         File uploadedFile = driveService.uploadFIle(tmpFile, fileInfo);
         tmpFile.delete();
         return uploadedFile.getId() + " " + uploadedFile.getName();
@@ -39,8 +39,8 @@ public class DriveController {
         return driveService.showAllFiles();
     }
 
-    private java.io.File multipartToFile(MultipartFile file) throws IOException {
-        var convFile = new java.io.File(System.getProperty("java.io.tmpdir") + "/" + file.getOriginalFilename());
+    private java.io.File multipartToFile(MultipartFile file, String fileName) throws IOException {
+        var convFile = new java.io.File(System.getProperty("java.io.tmpdir"), fileName);
         file.transferTo(convFile);
         return convFile;
     }

@@ -67,5 +67,9 @@ public class SessionManager {
         public PhotoUploadConversationProcessor getConversation() {
             return conversationProcessor;
         }
+
+        public void process(FormattedUpdate update, DriveSyncBot bot) {
+            conversationProcessor.process(update, bot);
+        }
     }
 }

@@ -31,6 +31,8 @@ public class BotConfiguration {
     public static final String CANT_REACH_EXCEPTION_MESSAGE = "Диалог закончился, " +
             "сессия должна быть удалена, " +
             "выполнение не должно доходить до этого момента";
+    public static final String UPLOAD_COMMAND = "/upload";
+    public static final String START_COMMAND = "/start";
     public static final String BOT_NAME = "syncfilesbot";
     public static final String RESOURCE_NAME = "TELEGRAM";
     private final String botToken;

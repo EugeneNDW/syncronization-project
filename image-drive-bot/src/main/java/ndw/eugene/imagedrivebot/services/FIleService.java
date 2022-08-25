@@ -7,6 +7,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.FormBodyPartBuilder;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
@@ -18,6 +19,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+import static org.apache.http.entity.ContentType.MULTIPART_FORM_DATA;
 
 @Service
 public class FIleService implements IFileService {
@@ -35,9 +40,16 @@ public class FIleService implements IFileService {
     public void sendFileToDisk(File fileToDisk, FileInfoDto fileInfo) {
         HttpEntity entity;
         try {
+            var fileUTF8Name = "UTF-8''" + URLEncoder.encode(fileToDisk.getName(), StandardCharsets.UTF_8);
+            FileBody fileBody = new FileBody(fileToDisk, MULTIPART_FORM_DATA);
+            var cd = String.format("form-data; name=\"%s\"; filename=\"%s\"; filename*=\"%s\"", "file", fileToDisk.getName(), fileUTF8Name);
+            var filePart = FormBodyPartBuilder
+                    .create("File", fileBody)
+                    .addField("Content-Disposition", cd)
+                    .build();
             entity = MultipartEntityBuilder
                     .create()
-                    .addPart("file", new FileBody(fileToDisk))
+                    .addPart(filePart)
                     .addPart("fileInfo", new StringBody(objectMapper.writeValueAsString(fileInfo), ContentType.APPLICATION_JSON))
                     .build();
         } catch (JsonProcessingException e) { //todo exception
