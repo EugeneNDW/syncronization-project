@@ -111,11 +111,9 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         String messageText = update.getMessageText();
         if (Objects.equals(messageText, START_COMMAND)) {
             sendMessageToChat(HELLO_MESSAGE, chatId);
-        } else {
-            if (Objects.equals(messageText, UPLOAD_COMMAND)) {
-                conversationService.startUploadFileConversation(userId, chatId);
-                processSession(update);
-            }
+        } else if (Objects.equals(messageText, UPLOAD_COMMAND)) {
+            conversationService.startUploadFileConversation(userId, chatId);
+            processSession(update);
         }
     }
 
@@ -124,7 +122,12 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         Long userId = update.getUserId();
         var session = sessionManager.getSessionForUserInChat(userId, chatId);
         if (session != null && !session.isExpired()) {
-            session.process(update, this);
+            if (Objects.equals(update.getMessageText(), END_CONVERSATION_COMMAND)) {
+                sessionManager.removeSession(userId, chatId);
+                sendMessageToChat(SESSION_WAS_CANCELED_MESSAGE, chatId);
+            } else {
+                session.process(update, this);
+            }
         } else {
             sessionManager.removeSession(userId, chatId);
             sendMessageToChat(SESSION_EXPIRED_MESSAGE, chatId);

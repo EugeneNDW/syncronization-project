@@ -105,6 +105,13 @@ public class PhotoUploadConversationProcessor {
         throw new IllegalArgumentException(CANT_REACH_EXCEPTION_MESSAGE);
     };
 
+    public void clearConversation() {
+        if (job != null) {
+            job.cancel(false);
+        }
+        photosData.getUploadedFiles().clear();
+    }
+
     private ScheduledFuture<?> schedulePhotoUpload(FormattedUpdate update, DriveSyncBot bot) {
         return scheduler.schedule(
                 () -> sendPhotos(update, bot),

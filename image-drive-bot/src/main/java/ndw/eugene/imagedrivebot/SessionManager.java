@@ -31,6 +31,10 @@ public class SessionManager {
     }
 
     public void removeSession(long userId, long chatId) {
+        var session = usersSessions.get(userId, chatId);
+        if (session != null) {
+            session.close();
+        }
         usersSessions.remove(userId, chatId);
     }
 
@@ -56,10 +60,6 @@ public class SessionManager {
             this.timeout = defaultTimeout;
         }
 
-        public boolean isActive() {
-            return !isExpired() && !isEnded();
-        }
-
         public boolean isExpired() {
             return startTime.plus(timeout, ChronoUnit.MINUTES).isBefore(Instant.now());
         }
@@ -74,6 +74,10 @@ public class SessionManager {
 
         public void process(FormattedUpdate update, DriveSyncBot bot) {
             conversationProcessor.process(update, bot);
+        }
+
+        private void close() {
+            conversationProcessor.clearConversation();
         }
     }
 }
