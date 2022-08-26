@@ -30,8 +30,12 @@ public class SessionManager {
         return usersSessions.get(userId, chatId);
     }
 
-    public void removeSession(Session session) {
-        usersSessions.remove(session.userId, session.chatId);
+    public void removeSession(long userId, long chatId) {
+        usersSessions.remove(userId, chatId);
+    }
+
+    public boolean sessionExists(long userId, long chatId) {
+        return getSessionForUserInChat(userId, chatId) != null;
     }
 
     public static class Session {

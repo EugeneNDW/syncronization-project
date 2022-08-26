@@ -24,8 +24,8 @@ public class ConversationService {
         this.scheduler = scheduler;
     }
 
-    public SessionManager.Session startUploadFileConversation(Long userId, Long chatId) {
+    public void startUploadFileConversation(Long userId, Long chatId) {
         var conversationProcessor = new PhotoUploadConversationProcessor(fileService, scheduler);
-        return sessionManager.startSession(userId, chatId, conversationProcessor);
+        sessionManager.startSession(userId, chatId, conversationProcessor);
     }
 }

@@ -1,6 +1,6 @@
 package ndw.eugene.imagedrivebot;
 
-import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
+import ndw.eugene.imagedrivebot.exceptions.NotAuthorizedException;
 import ndw.eugene.imagedrivebot.services.ConversationService;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
@@ -19,14 +19,17 @@ public class DriveSyncBot extends TelegramLongPollingBot {
 
     private final SessionManager sessionManager;
 
+    private final BotExceptionsHandler exceptionsHandler;
+
     private final String botToken;
 
     private final ConversationService conversationService;
 
     private final Set<Long> admins = Set.of(41809406L, 136094717L, 115364294L, 95263058L);
 
-    public DriveSyncBot(SessionManager sessionManager, String botToken, ConversationService conversationService) {
+    public DriveSyncBot(SessionManager sessionManager, BotExceptionsHandler exceptionsHandler, String botToken, ConversationService conversationService) {
         this.sessionManager = sessionManager;
+        this.exceptionsHandler = exceptionsHandler;
         this.botToken = botToken;
         this.conversationService = conversationService;
     }
@@ -51,60 +54,17 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             System.out.println(formattedUpdate.getMessageText());
             Long userId = formattedUpdate.getUserId();
             Long chatId = formattedUpdate.getChatId();
-
             if (!admins.contains(userId)) {
-                sendMessageToChat(UNAUTHORIZED_MESSAGE, chatId);
-                return;
+                throw new NotAuthorizedException(UNAUTHORIZED_MESSAGE);
             }
 
-            var session = sessionManager.getSessionForUserInChat(userId, chatId);
-            if (session != null) {
-                processSession(formattedUpdate, session);
+            if (sessionManager.sessionExists(userId, chatId)) {
+                processSession(formattedUpdate);
             } else {
                 processCommand(formattedUpdate);
             }
-        } catch (DocumentNotFoundException e) {
-            System.out.println(e.getMessage());
-            sendMessageToChat(e.getMessage(), update.getMessage().getChatId());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            sendMessageToChat(GENERIC_EXCEPTION_MESSAGE, update.getMessage().getChatId());
-        }
-    }
-
-    private boolean checkUpdateHasMessage(Update update) {
-        return update.getMessage() != null;
-    }
-
-    private boolean checkUpdateFromUser(Update update) {
-        return update.getMessage() != null;
-    }
-
-    private FormattedUpdate formatUpdate(Update update) {
-        return new FormattedUpdate(update);
-    }
-
-    private void processCommand(FormattedUpdate update) {
-        Long chatId = update.getChatId();
-        Long userId = update.getUserId();
-
-        String messageText = update.getMessageText();
-        if (Objects.equals(messageText, START_COMMAND)) {
-            sendMessageToChat(HELLO_MESSAGE, chatId);
-        } else {
-            if (Objects.equals(messageText, UPLOAD_COMMAND)) {
-                var session = conversationService.startUploadFileConversation(userId, chatId);
-                processSession(update, session);
-            }
-        }
-    }
-
-    private void processSession(FormattedUpdate update, SessionManager.Session session) {
-        if (!session.isExpired()) {
-            session.process(update, this);
-        } else {
-            sessionManager.removeSession(session);
-            sendMessageToChat(SESSION_EXPIRED_MESSAGE, update.getChatId());
+            exceptionsHandler.handle(this, e, update);
         }
     }
 
@@ -129,6 +89,45 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e); //todo переделать обработку ошибки
+        }
+    }
+
+    private boolean checkUpdateHasMessage(Update update) {
+        return update.getMessage() != null;
+    }
+
+    private boolean checkUpdateFromUser(Update update) {
+        return update.getMessage() != null;
+    }
+
+    private FormattedUpdate formatUpdate(Update update) {
+        return new FormattedUpdate(update);
+    }
+
+    private void processCommand(FormattedUpdate update) {
+        Long chatId = update.getChatId();
+        Long userId = update.getUserId();
+
+        String messageText = update.getMessageText();
+        if (Objects.equals(messageText, START_COMMAND)) {
+            sendMessageToChat(HELLO_MESSAGE, chatId);
+        } else {
+            if (Objects.equals(messageText, UPLOAD_COMMAND)) {
+                conversationService.startUploadFileConversation(userId, chatId);
+                processSession(update);
+            }
+        }
+    }
+
+    private void processSession(FormattedUpdate update) {
+        Long chatId = update.getChatId();
+        Long userId = update.getUserId();
+        var session = sessionManager.getSessionForUserInChat(userId, chatId);
+        if (session != null && !session.isExpired()) {
+            session.process(update, this);
+        } else {
+            sessionManager.removeSession(userId, chatId);
+            sendMessageToChat(SESSION_EXPIRED_MESSAGE, chatId);
         }
     }
 }

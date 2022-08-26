@@ -1,6 +1,7 @@
 package ndw.eugene.imagedrivebot.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ndw.eugene.imagedrivebot.BotExceptionsHandler;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.SessionManager;
 import ndw.eugene.imagedrivebot.services.ConversationService;
@@ -19,6 +20,8 @@ public class BotConfiguration {
     public static final String HELLO_MESSAGE = "привет, я синхробот синхронизирую файлы";
     public static final String GENERIC_EXCEPTION_MESSAGE = "что-то случилось, мы всё записали и обязательно " +
             "разберемся. Попробуйте ещё раз или ещё раз, но позже";
+    public static final String SERVER_ERROR_MESSAGE = "что-то сервер не справляется, " +
+            "мы посмотрим и всё починим. попробуйте позже";
     public static final String UNAUTHORIZED_MESSAGE = "знакомы?";
     public static final String UPLOAD_START_MESSAGE = "начинаем загрузку фотографий, " +
             "введите описание для загружаемых фото," +
@@ -54,8 +57,9 @@ public class BotConfiguration {
 
     @Bean
     public DriveSyncBot getDriveSyncBot(SessionManager sessionManager,
+                                        BotExceptionsHandler exceptionsHandler,
                                         ConversationService conversationService) {
-        return new DriveSyncBot(sessionManager, botToken, conversationService);
+        return new DriveSyncBot(sessionManager, exceptionsHandler, botToken, conversationService);
     }
 
     @Bean
