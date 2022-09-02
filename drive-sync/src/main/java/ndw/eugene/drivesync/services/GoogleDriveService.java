@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
 @Service
+@Transactional
 public class GoogleDriveService implements IGoogleDriveService {
     @Autowired
     private final IFileInfoService fileInfoService;
