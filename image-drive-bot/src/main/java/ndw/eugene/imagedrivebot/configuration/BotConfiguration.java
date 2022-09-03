@@ -50,6 +50,8 @@ public class BotConfiguration {
             "сессия должна быть удалена, " +
             "выполнение не должно доходить до этого момента";
 
+    public static final int MAX_FILE_SIZE_IN_BYTES = 20_971_520;
+
     public static final String RESOURCE_NAME = "TELEGRAM";
 
     private final String botToken;

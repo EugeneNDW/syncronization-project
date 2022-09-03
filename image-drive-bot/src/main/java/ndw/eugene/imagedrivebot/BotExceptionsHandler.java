@@ -2,6 +2,7 @@ package ndw.eugene.imagedrivebot;
 
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
 import ndw.eugene.imagedrivebot.exceptions.DriveSyncException;
+import ndw.eugene.imagedrivebot.exceptions.FileTooBigException;
 import ndw.eugene.imagedrivebot.exceptions.NotAuthorizedException;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -32,7 +33,9 @@ public class BotExceptionsHandler {
         } else if (e instanceof DriveSyncException) {
             System.out.println(e.getMessage());
             bot.sendMessageToChat(SERVER_ERROR_MESSAGE, update.getMessage().getChatId());
-        } else {
+        } else if (e instanceof FileTooBigException) {
+            bot.sendMessageToChat(e.getMessage(), update.getMessage().getChatId());
+        }else {
             bot.sendMessageToChat(GENERIC_EXCEPTION_MESSAGE, update.getMessage().getChatId());
         }
     }
