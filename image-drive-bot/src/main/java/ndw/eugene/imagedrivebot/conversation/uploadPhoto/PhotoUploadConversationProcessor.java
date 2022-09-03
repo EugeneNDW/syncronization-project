@@ -1,7 +1,7 @@
 package ndw.eugene.imagedrivebot.conversation.uploadPhoto;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.FormattedUpdate;
+import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.conversation.UpdateProcessor;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
@@ -60,20 +60,20 @@ public class PhotoUploadConversationProcessor {
     }
 
     public final UpdateProcessor startProcessor = (update, bot) ->
-            bot.sendMessageToChat(UPLOAD_START_MESSAGE, update.getChatId());
+            bot.sendMessageToChat(UPLOAD_START_MESSAGE, update.chatId());
 
     public final UpdateProcessor descriptionProcessor = (update, bot) -> {
-        var description = update.messageTextIsNotEmpty() ? update.getMessageText() : "";
-        photosData.setDescription(description + " " + update.getUserId());
-        bot.sendMessageToChat(UPLOAD_DESCRIPTION_SAVED_MESSAGE, update.getChatId());
+        var description = update.messageTextIsNotEmpty() ? update.messageText() : "";
+        photosData.setDescription(description + " " + update.userId());
+        bot.sendMessageToChat(UPLOAD_DESCRIPTION_SAVED_MESSAGE, update.chatId());
     };
 
     public final UpdateProcessor photosProcessor = (update, bot) -> {
         if (!update.hasDocument()) {
             throw new DocumentNotFoundException(DOCUMENT_NOT_FOUND_EXCEPTION_MESSAGE);
         }
-        var updateMediaGroup = update.getMediaGroupId();
-        var document = update.getDocument();
+        var updateMediaGroup = update.mediaGroupId();
+        var document = update.document();
         boolean documentFromAnotherGroup = update.hasMediaGroup() && (mediaGroupId != null && !mediaGroupId.equals(updateMediaGroup));
         if (documentFromAnotherGroup) {
             return;
@@ -121,8 +121,8 @@ public class PhotoUploadConversationProcessor {
 
     private void sendPhotos(FormattedUpdate update, DriveSyncBot bot) {
         isTaskDone = true;
-        Long chatId = update.getChatId();
-        Long userId = update.getUserId();
+        Long chatId = update.chatId();
+        Long userId = update.userId();
         photosData.getUploadedFiles()
                 .forEach(f ->
                         fileService.sendFileToDisk(f,

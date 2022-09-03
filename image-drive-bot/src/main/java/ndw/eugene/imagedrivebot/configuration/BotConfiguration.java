@@ -5,6 +5,8 @@ import ndw.eugene.imagedrivebot.BotExceptionsHandler;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.SessionManager;
 import ndw.eugene.imagedrivebot.services.ConversationService;
+import ndw.eugene.imagedrivebot.services.IFileService;
+import ndw.eugene.imagedrivebot.services.UpdateMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,11 +35,12 @@ public class BotConfiguration {
     public static final String UNAUTHORIZED_MESSAGE = "знакомы?";
 
     public static final String UPLOAD_START_MESSAGE = "начинаем загрузку фотографий, " +
-            "введите описание для загружаемых фото," +
-            " либо команду /skip чтобы оставить описание пустым";
+            "введите описание для загружаемых фото";
 
     public static final String UPLOAD_DESCRIPTION_SAVED_MESSAGE = "описание сохранено. теперь загрузите " +
             "фотографии без сжатия, размером не более 20мб каждая";
+
+    public static final String RENAME_FOLDER_SUCCESS_MESSAGE = "папка была переименована";
 
     public static final String DOCUMENT_NOT_FOUND_EXCEPTION_MESSAGE = "Не удалось найти документ в сообщении. " +
             "Возможно вы не прикрепили фотографии, " +
@@ -46,20 +49,19 @@ public class BotConfiguration {
     public static final String CANT_REACH_EXCEPTION_MESSAGE = "Диалог закончился, " +
             "сессия должна быть удалена, " +
             "выполнение не должно доходить до этого момента";
-    public static final String UPLOAD_COMMAND = "/upload";
-
-    public static final String END_CONVERSATION_COMMAND = "/endconv";
-
-    public static final String START_COMMAND = "/start";
-
-    public static final String BOT_NAME = "syncfilesbot";
 
     public static final String RESOURCE_NAME = "TELEGRAM";
 
     private final String botToken;
 
-    public BotConfiguration(@Value("${application.telegrambot.token}") String botToken) {
+    private final String botName;
+
+    public BotConfiguration(
+            @Value("${application.telegrambot.token}") String botToken,
+            @Value("${application.telegrambot.name}") String botName
+    ) {
         this.botToken = botToken;
+        this.botName = botName;
     }
 
     @Bean
@@ -76,8 +78,18 @@ public class BotConfiguration {
     @Bean
     public DriveSyncBot getDriveSyncBot(SessionManager sessionManager,
                                         BotExceptionsHandler exceptionsHandler,
-                                        ConversationService conversationService) {
-        return new DriveSyncBot(sessionManager, exceptionsHandler, botToken, conversationService);
+                                        ConversationService conversationService,
+                                        UpdateMapper updateMapper,
+                                        IFileService fileService) {
+        return new DriveSyncBot(
+                botName,
+                botToken,
+                sessionManager,
+                exceptionsHandler,
+                updateMapper,
+                conversationService,
+                fileService
+        );
     }
 
     @Bean

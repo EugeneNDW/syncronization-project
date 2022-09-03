@@ -3,6 +3,7 @@ package ndw.eugene.imagedrivebot;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadConversationProcessor;
+import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;

@@ -3,11 +3,13 @@ package ndw.eugene.imagedrivebot.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
+import ndw.eugene.imagedrivebot.dto.RenameFolderDto;
 import ndw.eugene.imagedrivebot.exceptions.DriveSyncException;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.FormBodyPartBuilder;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -41,21 +43,54 @@ public class FIleService implements IFileService {
 
     @Override
     public void sendFileToDisk(File fileToDisk, FileInfoDto fileInfo) {
-        HttpEntity entity;
-        try {
-            FormBodyPart filePart = createFilePart(fileToDisk);
-            entity = MultipartEntityBuilder
-                    .create()
-                    .addPart(filePart)
-                    .addPart("fileInfo", new StringBody(objectMapper.writeValueAsString(fileInfo), ContentType.APPLICATION_JSON))
-                    .build();
-        } catch (JsonProcessingException e) { //todo exception
-            throw new RuntimeException(e);
-        }
+        FormBodyPart filePart = createFilePart(fileToDisk);
+        var body = objectToJSON(fileInfo);
+        var entity = MultipartEntityBuilder
+                .create()
+                .addPart(filePart)
+                .addPart("fileInfo", new StringBody(body, ContentType.APPLICATION_JSON))
+                .build();
 
-        HttpPost request = new HttpPost(diskUrl);
+        HttpPost request = new HttpPost(diskUrl + "/files");
         request.setEntity(entity);
 
+        makeHttpRequest(request);
+    }
+
+    @Override
+    public void renameChatFolder(long chatId, String newFolderName) {
+        var body = objectToJSON(new RenameFolderDto(newFolderName));
+        var requestEntity = new StringEntity(body, ContentType.APPLICATION_JSON);
+        var request = new HttpPost(diskUrl + "/" + chatId + "/folders/name");
+        request.setEntity(requestEntity);
+
+        makeHttpRequest(request);
+    }
+
+    private FormBodyPart createFilePart(File fileToDisk) {
+        var fileUTF8Name = "UTF-8''" + URLEncoder.encode(fileToDisk.getName(), StandardCharsets.UTF_8);
+        FileBody fileBody = new FileBody(fileToDisk, MULTIPART_FORM_DATA);
+        var ContentDispositionHeader = String.format(
+                "form-data; name=\"%s\"; filename=\"%s\"; filename*=\"%s\"",
+                "file",
+                fileToDisk.getName(),
+                fileUTF8Name
+        );
+        return FormBodyPartBuilder
+                .create("File", fileBody)
+                .addField("Content-Disposition", ContentDispositionHeader)
+                .build();
+    }
+
+    private String objectToJSON(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e); //todo custom exception
+        }
+    }
+
+    private void makeHttpRequest(HttpEntityEnclosingRequestBase request) {
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             try (CloseableHttpResponse response = httpclient.execute(request)) {
                 var responseStatus = response.getStatusLine().getStatusCode();
@@ -66,22 +101,7 @@ public class FIleService implements IFileService {
                 System.out.println(response);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e); //todo exception
+            throw new RuntimeException(e); //todo custom exception
         }
-    }
-
-    private FormBodyPart createFilePart(File fileToDisk) {
-        var fileUTF8Name = "UTF-8''" + URLEncoder.encode(fileToDisk.getName(), StandardCharsets.UTF_8);
-        FileBody fileBody = new FileBody(fileToDisk, MULTIPART_FORM_DATA);
-        var ContentDespositionHeader = String.format(
-                "form-data; name=\"%s\"; filename=\"%s\"; filename*=\"%s\"",
-                "file",
-                fileToDisk.getName(),
-                fileUTF8Name
-        );
-        return FormBodyPartBuilder
-                .create("File", fileBody)
-                .addField("Content-Disposition", ContentDespositionHeader)
-                .build();
     }
 }

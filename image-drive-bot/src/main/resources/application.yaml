@@ -1,11 +1,9 @@
 application:
-  telegrambot.token: "${TELEGRAMBOT_TOKEN}"
+  telegrambot:
+    name: "${TELEGRAMBOT_NAME}"
+    token: "${TELEGRAMBOT_TOKEN}"
   driveservice.url: "${DRIVESERVICE_URL}"
 
 spring:
   main:
     web-application-type: none
-
-chat:
-  id: "-1001416816634"
-  name: "Балкон"
