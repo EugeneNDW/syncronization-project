@@ -121,20 +121,22 @@ public class PhotoUploadConversationProcessor {
 
     private void sendPhotos(FormattedUpdate update, DriveSyncBot bot) {
         isTaskDone = true;
-        Long chatId = update.chatId();
-        Long userId = update.userId();
+        long chatId = update.chatId();
+        long userId = update.userId();
         photosData.getUploadedFiles()
                 .forEach(f ->
-                        fileService.sendFileToDisk(f,
+                        fileService.sendFileToDisk(
+                                chatId,
+                                f,
                                 new FileInfoDto(
-                                        chatId,
                                         userId,
                                         f.getName(),
                                         photosData.getDescription(),
-                                        RESOURCE_NAME))
+                                        RESOURCE_NAME
+                                )
+                        )
                 );
-
-        bot.sendMessageToChat("загружено:" + photosData.getUploadedFiles().size() + " фотографий", chatId);
+        bot.sendMessageToChat("загружено: " + photosData.getUploadedFiles().size() + " фотографий", chatId);
         nextStage();
     }
 }

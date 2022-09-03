@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IGoogleDriveService {
-    File uploadFIle(java.io.File filePath, FileInfoDto fileInfo);
+    File uploadFIle(long chatId, java.io.File filePath, FileInfoDto fileInfo);
     String deleteFileById(String fileId);
     List<File> showAllFiles();
 }

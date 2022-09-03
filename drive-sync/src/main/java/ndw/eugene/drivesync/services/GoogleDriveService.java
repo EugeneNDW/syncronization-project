@@ -43,8 +43,8 @@ public class GoogleDriveService implements IGoogleDriveService {
     }
 
     @Override
-    public File uploadFIle(java.io.File filePath, FileInfoDto fileInfoDto) {
-        var folderId = folderService.getFolderByChatId(fileInfoDto.chatId());
+    public File uploadFIle(long chatId, java.io.File filePath, FileInfoDto fileInfoDto) {
+        var folderId = folderService.getFolderByChatId(chatId);
 
         File metadata = createMetadataFromFileInfo(filePath, fileInfoDto, folderId.getFolderId());
         FileContent mediaContent = fileToFileContent(filePath);

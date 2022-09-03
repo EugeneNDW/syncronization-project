@@ -11,32 +11,34 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/drive")
-public class DriveController {
+@RequestMapping("/{chatId}/files")
+public class FilesController {
     @Autowired
     private final IGoogleDriveService driveService;
 
-    public DriveController(IGoogleDriveService driveService) {
+    public FilesController(IGoogleDriveService driveService) {
         this.driveService = driveService;
     }
 
-    @PostMapping("/files")
-    public String uploadFiles(@RequestPart("file") MultipartFile file,
-                              @RequestPart(value = "fileInfo") FileInfoDto fileInfo) throws IOException {
+    @GetMapping
+    public List<File> showAllFiles() {
+        return driveService.showAllFiles();
+    }
+
+    @PostMapping
+    public String uploadFiles(
+            @PathVariable("chatId") long chatId,
+            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "fileInfo") FileInfoDto fileInfo) throws IOException {
         java.io.File tmpFile = multipartToFile(file, fileInfo.name());
-        File uploadedFile = driveService.uploadFIle(tmpFile, fileInfo);
+        File uploadedFile = driveService.uploadFIle(chatId, tmpFile, fileInfo);
         tmpFile.delete();
         return uploadedFile.getId() + " " + uploadedFile.getName();
     }
 
-    @DeleteMapping("/files/{fileId}")
+    @DeleteMapping("/{fileId}")
     public String deleteFile(@PathVariable("fileId") String fileId) {
         return driveService.deleteFileById(fileId);
-    }
-
-    @GetMapping("/files")
-    public List<File> showAllFiles() {
-        return driveService.showAllFiles();
     }
 
     private java.io.File multipartToFile(MultipartFile file, String fileName) throws IOException {

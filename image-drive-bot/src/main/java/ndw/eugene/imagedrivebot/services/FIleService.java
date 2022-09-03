@@ -42,7 +42,7 @@ public class FIleService implements IFileService {
     }
 
     @Override
-    public void sendFileToDisk(File fileToDisk, FileInfoDto fileInfo) {
+    public void sendFileToDisk(long chatId, File fileToDisk, FileInfoDto fileInfo) {
         FormBodyPart filePart = createFilePart(fileToDisk);
         var body = objectToJSON(fileInfo);
         var entity = MultipartEntityBuilder
@@ -51,7 +51,7 @@ public class FIleService implements IFileService {
                 .addPart("fileInfo", new StringBody(body, ContentType.APPLICATION_JSON))
                 .build();
 
-        HttpPost request = new HttpPost(diskUrl + "/files");
+        HttpPost request = new HttpPost(diskUrl + "/" + chatId + "/files");
         request.setEntity(entity);
 
         makeHttpRequest(request);

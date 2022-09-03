@@ -5,7 +5,7 @@ import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import java.io.File;
 
 public interface IFileService {
-    void sendFileToDisk(File fileToDisk, FileInfoDto fileInfo);
+    void sendFileToDisk(long chatId, File fileToDisk, FileInfoDto fileInfo);
 
     void renameChatFolder(long chatId, String newFolderName);
 }

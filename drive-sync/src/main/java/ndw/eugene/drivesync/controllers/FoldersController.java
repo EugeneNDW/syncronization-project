@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
-@RequestMapping("/drive/{chatId}/folders")
+@RequestMapping("/{chatId}/folders")
 @RestController
 public class FoldersController {
 
