@@ -68,31 +68,42 @@ public class PhotoUploadConversationProcessor {
         bot.sendMessageToChat(UPLOAD_DESCRIPTION_SAVED_MESSAGE, update.chatId());
     };
 
+
+    //приходит апдейт с null, у нас есть группа                             -> пропускаем
+    //приходит апдейт с группой, у нас есть группа и она не такая группа    -> пропускаем
+    //приходит апдейт с null, у нас нету группы                             -> грузим одну фотку
+    //приходит апдейт с группой, у нас есть группа и она такая же группа    -> добавляем в фотки, обновляем джобу
+    //приходит апдейт с группой, у нас нет группы                           -> добавляем в фотки, устанавливаем группу, начинаем джобу
+
     public final UpdateProcessor photosProcessor = (update, bot) -> {
+        //валидируем
         if (!update.hasDocument()) {
             throw new DocumentNotFoundException(DOCUMENT_NOT_FOUND_EXCEPTION_MESSAGE);
         }
         var updateMediaGroup = update.mediaGroupId();
         var document = update.document();
-        boolean documentFromAnotherGroup = update.hasMediaGroup() && (mediaGroupId != null && !mediaGroupId.equals(updateMediaGroup));
-        if (documentFromAnotherGroup) {
+        boolean updateHasGroup = update.hasMediaGroup();
+        boolean weHaveGroup = mediaGroupId != null;
+        boolean weHaveGroupUpdateNot = !updateHasGroup && weHaveGroup;
+        boolean updateFromAnotherGroup = updateHasGroup && weHaveGroup && !mediaGroupId.equals(updateMediaGroup);
+        if (weHaveGroupUpdateNot || updateFromAnotherGroup) {
             return;
         }
 
-        File file;
+        //делаем работу
         try {
+            File file;
             file = bot.downloadFile(document);
+            photosData.addFile(file);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e); //todo костыль, подумать когда скачивать файлы и что делать с ошибкой.
         }
-        photosData.addFile(file);
-        if (mediaGroupId == null) {
-            if (update.hasMediaGroup()) {
-                mediaGroupId = updateMediaGroup;
-                job = schedulePhotoUpload(update, bot);
-            } else {
-                sendPhotos(update, bot);
-            }
+
+        if (!updateHasGroup) {
+            sendPhotos(update, bot);
+        } else if (!weHaveGroup) {
+            mediaGroupId = updateMediaGroup;
+            job = schedulePhotoUpload(update, bot);
         } else if (mediaGroupId.equals(updateMediaGroup)) {
             if (job != null) {
                 job.cancel(false);
