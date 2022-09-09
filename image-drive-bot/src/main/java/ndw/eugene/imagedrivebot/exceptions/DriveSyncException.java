@@ -1,7 +1,7 @@
 package ndw.eugene.imagedrivebot.exceptions;
 
-public class DriveSyncException extends RuntimeException {
+public class DriveSyncException extends CustomException {
     public DriveSyncException(String message) {
-        super(message);
+        super(message, true);
     }
 }

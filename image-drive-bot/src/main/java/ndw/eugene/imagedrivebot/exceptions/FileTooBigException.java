@@ -1,7 +1,7 @@
 package ndw.eugene.imagedrivebot.exceptions;
 
-public class FileTooBigException extends RuntimeException {
+public class FileTooBigException extends CustomException {
     public FileTooBigException(String message) {
-        super(message);
+        super(message, false);
     }
 }

@@ -1,7 +1,7 @@
 package ndw.eugene.imagedrivebot.exceptions;
 
-public class NotAuthorizedException extends RuntimeException {
+public class NotAuthorizedException extends CustomException{
     public NotAuthorizedException(String message) {
-        super(message);
+        super(message, true);
     }
 }
