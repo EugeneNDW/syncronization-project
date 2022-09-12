@@ -75,7 +75,7 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             var formattedUpdate = updateMapper.formatUpdate(update);
             System.out.println(formattedUpdate.messageText());
             if (!admins.contains(formattedUpdate.userId())) {
-                throw new NotAuthorizedException(UNAUTHORIZED_MESSAGE);
+                throw new NotAuthorizedException();
             }
 
             if (sessionManager.sessionExists(formattedUpdate.userId(), formattedUpdate.chatId())) {
@@ -88,18 +88,21 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         }
     }
 
-    public File downloadFile(Document document) throws TelegramApiException {
+    public File downloadFile(Document document) {
         if (document.getFileSize() > MAX_FILE_SIZE_IN_BYTES) {
             throw new FileTooBigException("Can't upload file: " + document.getFileName() + " larger then 20mb");
         }
+        try {
+            var outputFile = new File(System.getProperty("java.io.tmpdir") + "/" + document.getFileName());
 
-        var outputFile = new java.io.File(System.getProperty("java.io.tmpdir") + "/" + document.getFileName());
+            GetFile getFile = new GetFile();
+            getFile.setFileId(document.getFileId());
+            String filePath = execute(getFile).getFilePath();
 
-        GetFile getFile = new GetFile();
-        getFile.setFileId(document.getFileId());
-        String filePath = execute(getFile).getFilePath();
-
-        return downloadFile(filePath, outputFile);
+            return downloadFile(filePath, outputFile);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e); //todo кидать кастомную ошибку
+        }
     }
 
     public void sendMessageToChat(String message, Long chatId) {
@@ -116,14 +119,6 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e); //todo переделать обработку ошибки
         }
-    }
-
-    private boolean checkUpdateHasMessage(Update update) {
-        return update.getMessage() != null;
-    }
-
-    private boolean checkUpdateFromUser(Update update) {
-        return update.getMessage().getFrom() != null;
     }
 
     private void processCommand(FormattedUpdate update) {
@@ -155,4 +150,14 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             sendMessageToChat(SESSION_EXPIRED_MESSAGE, chatId);
         }
     }
+
+    //todo extract to validator
+    private boolean checkUpdateHasMessage(Update update) {
+        return update.getMessage() != null;
+    }
+
+    private boolean checkUpdateFromUser(Update update) {
+        return update.getMessage().getFrom() != null;
+    }
+
 }

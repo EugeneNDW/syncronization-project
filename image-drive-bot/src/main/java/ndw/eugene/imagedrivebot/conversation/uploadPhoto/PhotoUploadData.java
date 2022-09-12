@@ -1,21 +1,22 @@
 package ndw.eugene.imagedrivebot.conversation.uploadPhoto;
 
-import java.io.File;
+import org.telegram.telegrambots.meta.api.objects.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class PhotoUploadData {
 
-    private final List<File> uploadedFiles = new ArrayList<>();
+    private final List<Document> documents = new ArrayList<>();
 
     private String description;
 
-    public void addFile(File file) {
-        uploadedFiles.add(file);
+    public void addFile(Document file) {
+        documents.add(file);
     }
 
-    public List<File> getUploadedFiles() {
-        return uploadedFiles;
+    public List<Document> getDocuments() {
+        return documents;
     }
 
     public String getDescription() {

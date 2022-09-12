@@ -2,6 +2,8 @@ package ndw.eugene.imagedrivebot.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadData;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.dto.RenameFolderDto;
 import ndw.eugene.imagedrivebot.exceptions.DriveSyncException;
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.RESOURCE_NAME;
 import static org.apache.http.entity.ContentType.MULTIPART_FORM_DATA;
 
 @Service
@@ -55,6 +58,20 @@ public class FIleService implements IFileService {
         request.setEntity(entity);
 
         makeHttpRequest(request);
+    }
+
+    @Override
+    public void synchronizeFiles(DriveSyncBot bot, long chatId, long userId, PhotoUploadData photoData) {
+        photoData.getDocuments()
+                .parallelStream()
+                .map(bot::downloadFile)
+                .forEach(f ->
+                        sendFileToDisk(
+                                chatId,
+                                f,
+                                new FileInfoDto(userId, f.getName(), photoData.getDescription(), RESOURCE_NAME)
+                        )
+                );
     }
 
     @Override
