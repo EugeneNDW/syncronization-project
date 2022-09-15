@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadData;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
+import ndw.eugene.imagedrivebot.dto.FilesSynchronizationResponse;
 import ndw.eugene.imagedrivebot.dto.RenameFolderDto;
-import ndw.eugene.imagedrivebot.exceptions.DriveSyncException;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
@@ -27,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.RESOURCE_NAME;
 import static org.apache.http.entity.ContentType.MULTIPART_FORM_DATA;
@@ -45,7 +47,7 @@ public class FIleService implements IFileService {
     }
 
     @Override
-    public void sendFileToDisk(long chatId, File fileToDisk, FileInfoDto fileInfo) {
+    public FilesSynchronizationResponse sendFileToDisk(long chatId, File fileToDisk, FileInfoDto fileInfo) {
         FormBodyPart filePart = createFilePart(fileToDisk);
         var body = objectToJSON(fileInfo);
         var entity = MultipartEntityBuilder
@@ -57,21 +59,29 @@ public class FIleService implements IFileService {
         HttpPost request = new HttpPost(diskUrl + "/" + chatId + "/files");
         request.setEntity(entity);
 
-        makeHttpRequest(request);
+        var responseResult = makeHttpRequest(request);
+        var syncSuccess = responseResult.getStatusCode() < 400;
+
+        return new FilesSynchronizationResponse(fileInfo.name(), syncSuccess);
     }
 
     @Override
-    public void synchronizeFiles(DriveSyncBot bot, long chatId, long userId, PhotoUploadData photoData) {
-        photoData.getDocuments()
+    public List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, PhotoUploadData photoData) {
+        return photoData.getDocuments()
                 .parallelStream()
                 .map(bot::downloadFile)
-                .forEach(f ->
-                        sendFileToDisk(
-                                chatId,
-                                f,
-                                new FileInfoDto(userId, f.getName(), photoData.getDescription(), RESOURCE_NAME)
-                        )
-                );
+                .map(f -> {
+                            if (f.successStatus()) {
+                                return sendFileToDisk(chatId, f.file(), new FileInfoDto(
+                                        userId,
+                                        f.fileName(),
+                                        photoData.getDescription(),
+                                        RESOURCE_NAME));
+                            } else {
+                                return new FilesSynchronizationResponse(f.fileName(), false);
+                            }
+                        }
+                ).toList();
     }
 
     @Override
@@ -107,15 +117,11 @@ public class FIleService implements IFileService {
         }
     }
 
-    private void makeHttpRequest(HttpEntityEnclosingRequestBase request) {
+    private StatusLine makeHttpRequest(HttpEntityEnclosingRequestBase request) {
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             try (CloseableHttpResponse response = httpclient.execute(request)) {
-                var responseStatus = response.getStatusLine().getStatusCode();
-                var reason = response.getStatusLine().getReasonPhrase();
-                if (responseStatus >= 500) {
-                    throw new DriveSyncException("server error was happened with status code: " + responseStatus + " reason: " + reason);
-                }
                 System.out.println(response);
+                return response.getStatusLine();
             }
         } catch (IOException e) {
             throw new RuntimeException(e); //todo custom exception

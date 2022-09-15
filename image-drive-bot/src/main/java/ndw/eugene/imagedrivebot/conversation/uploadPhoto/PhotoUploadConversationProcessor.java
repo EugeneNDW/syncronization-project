@@ -10,6 +10,7 @@ import org.springframework.scheduling.TaskScheduler;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.*;
 
@@ -121,8 +122,13 @@ public class PhotoUploadConversationProcessor {
 
     private void sendPhotos(FormattedUpdate update, DriveSyncBot bot) {
         isTaskDone = true;
-        fileService.synchronizeFiles(bot, update.chatId(), update.userId(), photosData);
-        bot.sendMessageToChat("загружено: " + photosData.getDocuments().size() + " фотографий", update.chatId());
+        var results = fileService.synchronizeFiles(bot, update.chatId(), update.userId(), photosData);
+        var result = results
+                .stream()
+                .map( r -> r.fileName() + " : " + (r.successStatus() ? "успех" : "неуспех"))
+                .collect(Collectors.joining("\n", "Загружено: \n", ""));
+
+        bot.sendMessageToChat(result, update.chatId());
         nextStage();
     }
 }

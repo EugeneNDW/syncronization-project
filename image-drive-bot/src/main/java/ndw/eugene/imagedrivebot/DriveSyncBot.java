@@ -1,6 +1,7 @@
 package ndw.eugene.imagedrivebot;
 
 import ndw.eugene.imagedrivebot.configuration.BotCommands;
+import ndw.eugene.imagedrivebot.dto.FileDownloadResult;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.exceptions.FileTooBigException;
 import ndw.eugene.imagedrivebot.exceptions.NotAuthorizedException;
@@ -88,9 +89,9 @@ public class DriveSyncBot extends TelegramLongPollingBot {
         }
     }
 
-    public File downloadFile(Document document) {
+    public FileDownloadResult downloadFile(Document document) {
         if (document.getFileSize() > MAX_FILE_SIZE_IN_BYTES) {
-            throw new FileTooBigException("Can't upload file: " + document.getFileName() + " larger then 20mb");
+            return new FileDownloadResult(document.getFileName(),null, false);
         }
         try {
             var outputFile = new File(System.getProperty("java.io.tmpdir") + "/" + document.getFileName());
@@ -99,9 +100,10 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             getFile.setFileId(document.getFileId());
             String filePath = execute(getFile).getFilePath();
 
-            return downloadFile(filePath, outputFile);
+            File file = downloadFile(filePath, outputFile);
+            return new FileDownloadResult(document.getFileName(), file, true);
         } catch (TelegramApiException e) {
-            throw new RuntimeException(e); //todo кидать кастомную ошибку
+            return new FileDownloadResult(document.getFileName(), null, false);
         }
     }
 
