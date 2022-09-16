@@ -1,7 +1,8 @@
-package ndw.eugene.imagedrivebot;
+package ndw.eugene.imagedrivebot.services;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadConversationProcessor;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import org.springframework.stereotype.Component;

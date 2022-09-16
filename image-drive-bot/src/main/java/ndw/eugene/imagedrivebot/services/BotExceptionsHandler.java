@@ -1,12 +1,11 @@
-package ndw.eugene.imagedrivebot;
+package ndw.eugene.imagedrivebot.services;
 
+import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.configuration.BotMessage;
 import ndw.eugene.imagedrivebot.exceptions.*;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
-import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.GENERIC_EXCEPTION_MESSAGE;
-import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.SERVER_ERROR_MESSAGE;
 
 @Service
 public class BotExceptionsHandler {
@@ -32,9 +31,9 @@ public class BotExceptionsHandler {
             bot.sendMessageToChat(e.getMessage(), update.getMessage().getChatId());
         } else if (e instanceof DriveSyncException) {
             System.out.println(e.getMessage());
-            bot.sendMessageToChat(SERVER_ERROR_MESSAGE, update.getMessage().getChatId());
+            bot.sendMessageToChat(BotMessage.SERVER_ERROR.getMessage(), update.getMessage().getChatId());
         } else {
-            bot.sendMessageToChat(GENERIC_EXCEPTION_MESSAGE, update.getMessage().getChatId());
+            bot.sendMessageToChat(BotMessage.GENERIC_EXCEPTION.getMessage(), update.getMessage().getChatId());
         }
     }
 }

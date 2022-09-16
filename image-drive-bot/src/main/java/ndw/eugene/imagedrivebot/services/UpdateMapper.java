@@ -1,6 +1,6 @@
 package ndw.eugene.imagedrivebot.services;
 
-import ndw.eugene.imagedrivebot.configuration.BotCommands;
+import ndw.eugene.imagedrivebot.configuration.BotCommand;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -44,8 +44,8 @@ public class UpdateMapper {
     }
 
     private boolean validateCommand(String command) {
-        var commands = BotCommands.values();
-        for (BotCommands botCommand : commands) {
+        var commands = BotCommand.values();
+        for (BotCommand botCommand : commands) {
             if (Objects.equals(botCommand.getCommand(), command)) {
                 return true;
             }

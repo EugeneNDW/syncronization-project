@@ -1,12 +1,11 @@
 package ndw.eugene.imagedrivebot;
 
-import ndw.eugene.imagedrivebot.configuration.BotCommands;
+import ndw.eugene.imagedrivebot.configuration.BotCommand;
+import ndw.eugene.imagedrivebot.configuration.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FileDownloadResult;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.exceptions.NotAuthorizedException;
-import ndw.eugene.imagedrivebot.services.ConversationService;
-import ndw.eugene.imagedrivebot.services.IFileService;
-import ndw.eugene.imagedrivebot.services.UpdateMapper;
+import ndw.eugene.imagedrivebot.services.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -123,14 +122,14 @@ public class DriveSyncBot extends TelegramLongPollingBot {
     }
 
     private void processCommand(FormattedUpdate update) {
-        if (Objects.equals(update.command(), BotCommands.START_COMMAND.getCommand())) {
-            sendMessageToChat(HELLO_MESSAGE, update.chatId());
-        } else if (Objects.equals(update.command(), BotCommands.UPLOAD_COMMAND.getCommand())) {
+        if (Objects.equals(update.command(), BotCommand.START.getCommand())) {
+            sendMessageToChat(BotMessage.HELLO.getMessage(), update.chatId());
+        } else if (Objects.equals(update.command(), BotCommand.UPLOAD.getCommand())) {
             conversationService.startUploadFileConversation(update.userId(), update.chatId());
             processSession(update);
-        } else if (Objects.equals(update.command(), BotCommands.RENAME_FOLDER_COMMAND.getCommand())) {
+        } else if (Objects.equals(update.command(), BotCommand.RENAME_FOLDER.getCommand())) {
             fileService.renameChatFolder(update.chatId(), update.parameter());
-            sendMessageToChat(RENAME_FOLDER_SUCCESS_MESSAGE, update.chatId());
+            sendMessageToChat(BotMessage.RENAME_FOLDER_SUCCESS.getMessage(), update.chatId());
         }
     }
 
@@ -140,15 +139,15 @@ public class DriveSyncBot extends TelegramLongPollingBot {
 
         var session = sessionManager.getSessionForUserInChat(userId, chatId);
         if (session != null && !session.isExpired()) {
-            if (Objects.equals(update.command(), BotCommands.END_CONVERSATION_COMMAND.getCommand())) {
+            if (Objects.equals(update.command(), BotCommand.END_CONVERSATION.getCommand())) {
                 sessionManager.removeSession(userId, chatId);
-                sendMessageToChat(SESSION_WAS_CANCELED_MESSAGE, chatId);
+                sendMessageToChat(BotMessage.SESSION_WAS_CANCELED.getMessage(), chatId);
             } else {
                 session.process(update, this);
             }
         } else {
             sessionManager.removeSession(userId, chatId);
-            sendMessageToChat(SESSION_EXPIRED_MESSAGE, chatId);
+            sendMessageToChat(BotMessage.SESSION_EXPIRED.getMessage(), chatId);
         }
     }
 

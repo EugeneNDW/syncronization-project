@@ -1,9 +1,9 @@
 package ndw.eugene.imagedrivebot.exceptions;
 
-import ndw.eugene.imagedrivebot.configuration.BotConfiguration;
+import ndw.eugene.imagedrivebot.configuration.BotMessage;
 
 public class NotAuthorizedException extends CustomException{
     public NotAuthorizedException() {
-        super(BotConfiguration.UNAUTHORIZED_MESSAGE, true);
+        super(BotMessage.UNAUTHORIZED_EXCEPTION.getMessage(), true);
     }
 }

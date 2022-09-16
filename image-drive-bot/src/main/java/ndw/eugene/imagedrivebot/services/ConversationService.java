@@ -1,6 +1,5 @@
 package ndw.eugene.imagedrivebot.services;
 
-import ndw.eugene.imagedrivebot.SessionManager;
 import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadConversationProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;

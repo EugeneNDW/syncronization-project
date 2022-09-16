@@ -1,6 +1,7 @@
 package ndw.eugene.imagedrivebot.conversation.uploadPhoto;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.configuration.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.conversation.UpdateProcessor;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
@@ -11,8 +12,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
-
-import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.*;
 
 public class PhotoUploadConversationProcessor {
     private final int WAIT_FOR_UPDATES_LIMIT_IN_SEC = 30;
@@ -65,12 +64,12 @@ public class PhotoUploadConversationProcessor {
     }
 
     public final UpdateProcessor startProcessor = (update, bot) ->
-            bot.sendMessageToChat(UPLOAD_START_MESSAGE, update.chatId());
+            bot.sendMessageToChat(BotMessage.UPLOAD_START.getMessage(), update.chatId());
 
     public final UpdateProcessor descriptionProcessor = (update, bot) -> {
         var description = update.messageTextIsNotEmpty() ? update.messageText() : "";
         photosData.setDescription(description + " " + update.userId());
-        bot.sendMessageToChat(UPLOAD_DESCRIPTION_SAVED_MESSAGE, update.chatId());
+        bot.sendMessageToChat(BotMessage.DESCRIPTION_SAVED.getMessage(), update.chatId());
     };
 
     public final UpdateProcessor photosProcessor = (update, bot) -> {
@@ -103,7 +102,7 @@ public class PhotoUploadConversationProcessor {
     };
 
     public final UpdateProcessor endedProcessor = (update, bot) -> {
-        throw new IllegalArgumentException(CANT_REACH_EXCEPTION_MESSAGE);
+        throw new IllegalArgumentException(BotMessage.CANT_REACH_EXCEPTION.getMessage());
     };
 
     public void clearConversation() {

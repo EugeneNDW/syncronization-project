@@ -1,9 +1,9 @@
 package ndw.eugene.imagedrivebot.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ndw.eugene.imagedrivebot.BotExceptionsHandler;
+import ndw.eugene.imagedrivebot.services.BotExceptionsHandler;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.SessionManager;
+import ndw.eugene.imagedrivebot.services.SessionManager;
 import ndw.eugene.imagedrivebot.services.ConversationService;
 import ndw.eugene.imagedrivebot.services.IFileService;
 import ndw.eugene.imagedrivebot.services.UpdateMapper;
@@ -18,37 +18,6 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Configuration
 public class BotConfiguration {
-
-    public static final String SESSION_EXPIRED_MESSAGE = "сессия протухла, чтобы начать новую введите: /update";
-
-    public static final String SESSION_WAS_CANCELED_MESSAGE = "сессия удалена. можно начать новую, " +
-            "либо использовать команду.";
-
-    public static final String HELLO_MESSAGE = "привет, я синхробот синхронизирую файлы";
-
-    public static final String GENERIC_EXCEPTION_MESSAGE = "что-то случилось, мы всё записали и обязательно " +
-            "разберемся. Попробуйте ещё раз или ещё раз, но позже";
-
-    public static final String SERVER_ERROR_MESSAGE = "что-то сервер не справляется, " +
-            "мы посмотрим и всё починим. попробуйте позже";
-
-    public static final String UNAUTHORIZED_MESSAGE = "знакомы?";
-
-    public static final String UPLOAD_START_MESSAGE = "начинаем загрузку фотографий, " +
-            "введите описание для загружаемых фото";
-
-    public static final String UPLOAD_DESCRIPTION_SAVED_MESSAGE = "описание сохранено. теперь загрузите " +
-            "фотографии без сжатия, размером не более 20мб каждая";
-
-    public static final String RENAME_FOLDER_SUCCESS_MESSAGE = "папка была переименована";
-
-    public static final String DOCUMENT_NOT_FOUND_EXCEPTION_MESSAGE = "Не удалось найти документ в сообщении. " +
-            "Возможно вы не прикрепили фотографии, " +
-            "либо прикрепили фотографии со сжатием, попробуйте ещё раз";
-
-    public static final String CANT_REACH_EXCEPTION_MESSAGE = "Диалог закончился, " +
-            "сессия должна быть удалена, " +
-            "выполнение не должно доходить до этого момента";
 
     public static final int MAX_FILE_SIZE_IN_BYTES = 20_971_520;
 
