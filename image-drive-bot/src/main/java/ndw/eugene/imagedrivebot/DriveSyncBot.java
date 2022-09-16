@@ -3,7 +3,6 @@ package ndw.eugene.imagedrivebot;
 import ndw.eugene.imagedrivebot.configuration.BotCommands;
 import ndw.eugene.imagedrivebot.dto.FileDownloadResult;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
-import ndw.eugene.imagedrivebot.exceptions.FileTooBigException;
 import ndw.eugene.imagedrivebot.exceptions.NotAuthorizedException;
 import ndw.eugene.imagedrivebot.services.ConversationService;
 import ndw.eugene.imagedrivebot.services.IFileService;

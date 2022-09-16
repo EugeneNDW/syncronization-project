@@ -33,9 +33,7 @@ public class BotExceptionsHandler {
         } else if (e instanceof DriveSyncException) {
             System.out.println(e.getMessage());
             bot.sendMessageToChat(SERVER_ERROR_MESSAGE, update.getMessage().getChatId());
-        } else if (e instanceof FileTooBigException) {
-            bot.sendMessageToChat(e.getMessage(), update.getMessage().getChatId());
-        }else {
+        } else {
             bot.sendMessageToChat(GENERIC_EXCEPTION_MESSAGE, update.getMessage().getChatId());
         }
     }
