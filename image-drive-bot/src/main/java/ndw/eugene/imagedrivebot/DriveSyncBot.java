@@ -25,33 +25,25 @@ public class DriveSyncBot extends TelegramLongPollingBot {
 
     private final String botToken;
 
-    private final SessionManager sessionManager;
-
     private final BotExceptionsHandler exceptionsHandler;
 
     private final UpdateMapper updateMapper;
 
-    private final ConversationService conversationService;
-
-    private final IFileService fileService;
+    private final UpdatesHandler updatesHandler;
 
     private final Set<Long> admins = Set.of(41809406L, 136094717L, 115364294L, 95263058L);
 
     public DriveSyncBot(
             String botName,
             String botToken,
-            SessionManager sessionManager,
             BotExceptionsHandler exceptionsHandler,
             UpdateMapper updateMapper,
-            ConversationService conversationService,
-            IFileService fileService) {
-        this.sessionManager = sessionManager;
+            UpdatesHandler updatesHandler) {
         this.exceptionsHandler = exceptionsHandler;
         this.botToken = botToken;
         this.botName = botName;
-        this.conversationService = conversationService;
         this.updateMapper = updateMapper;
-        this.fileService = fileService;
+        this.updatesHandler = updatesHandler;
     }
 
     @Override
@@ -77,11 +69,7 @@ public class DriveSyncBot extends TelegramLongPollingBot {
                 throw new NotAuthorizedException();
             }
 
-            if (sessionManager.sessionExists(formattedUpdate.userId(), formattedUpdate.chatId())) {
-                processSession(formattedUpdate);
-            } else {
-                processCommand(formattedUpdate);
-            }
+            updatesHandler.handleUpdate(formattedUpdate, this);
         } catch (Exception e) {
             exceptionsHandler.handle(this, e, update);
         }
@@ -118,36 +106,6 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e); //todo переделать обработку ошибки
-        }
-    }
-
-    private void processCommand(FormattedUpdate update) {
-        if (Objects.equals(update.command(), BotCommand.START.getCommand())) {
-            sendMessageToChat(BotMessage.HELLO.getMessage(), update.chatId());
-        } else if (Objects.equals(update.command(), BotCommand.UPLOAD.getCommand())) {
-            conversationService.startUploadFileConversation(update.userId(), update.chatId());
-            processSession(update);
-        } else if (Objects.equals(update.command(), BotCommand.RENAME_FOLDER.getCommand())) {
-            fileService.renameChatFolder(update.chatId(), update.parameter());
-            sendMessageToChat(BotMessage.RENAME_FOLDER_SUCCESS.getMessage(), update.chatId());
-        }
-    }
-
-    private void processSession(FormattedUpdate update) {
-        long chatId = update.chatId();
-        long userId = update.userId();
-
-        var session = sessionManager.getSessionForUserInChat(userId, chatId);
-        if (session != null && !session.isExpired()) {
-            if (Objects.equals(update.command(), BotCommand.END_CONVERSATION.getCommand())) {
-                sessionManager.removeSession(userId, chatId);
-                sendMessageToChat(BotMessage.SESSION_WAS_CANCELED.getMessage(), chatId);
-            } else {
-                session.process(update, this);
-            }
-        } else {
-            sessionManager.removeSession(userId, chatId);
-            sendMessageToChat(BotMessage.SESSION_EXPIRED.getMessage(), chatId);
         }
     }
 

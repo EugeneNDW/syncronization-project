@@ -11,7 +11,7 @@ public enum BotMessage {
     GENERIC_EXCEPTION("что-то случилось, мы всё записали и обязательно разберемся. попробуйте позже"),
     UNAUTHORIZED_EXCEPTION("знакомы?"),
     SERVER_ERROR("что-то сервер не справляется, мы посмотрим и всё починим. попробуйте позже"),
-    SESSION_EXPIRED("сессия протухла, чтобы начать новую введите: /update"),
+    SESSION_EXPIRED("сессия протухла, чтобы начать новую введите: /upload"),
     SESSION_WAS_CANCELED("сессия удалена. можно начать новую, либо использовать команду."),
     ;
     private final String message;

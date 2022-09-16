@@ -1,12 +1,8 @@
 package ndw.eugene.imagedrivebot.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ndw.eugene.imagedrivebot.services.BotExceptionsHandler;
+import ndw.eugene.imagedrivebot.services.*;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.services.SessionManager;
-import ndw.eugene.imagedrivebot.services.ConversationService;
-import ndw.eugene.imagedrivebot.services.IFileService;
-import ndw.eugene.imagedrivebot.services.UpdateMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,20 +43,11 @@ public class BotConfiguration {
     }
 
     @Bean
-    public DriveSyncBot getDriveSyncBot(SessionManager sessionManager,
-                                        BotExceptionsHandler exceptionsHandler,
-                                        ConversationService conversationService,
+    public DriveSyncBot getDriveSyncBot(BotExceptionsHandler exceptionsHandler,
                                         UpdateMapper updateMapper,
-                                        IFileService fileService) {
-        return new DriveSyncBot(
-                botName,
-                botToken,
-                sessionManager,
-                exceptionsHandler,
-                updateMapper,
-                conversationService,
-                fileService
-        );
+                                        UpdatesHandler updatesHandler) {
+
+        return new DriveSyncBot(botName, botToken, exceptionsHandler, updateMapper, updatesHandler);
     }
 
     @Bean
