@@ -4,7 +4,9 @@ public enum BotCommand {
     UPLOAD("/upload"),
     END_CONVERSATION("/endconv"),
     START("/start"),
-    RENAME_FOLDER("/rename_f");
+    RENAME_FOLDER("/rename_f"),
+
+    SKIP_DESCRIPTION("/skip");
 
     private final String command;
 

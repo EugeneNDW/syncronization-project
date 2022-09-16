@@ -1,6 +1,7 @@
 package ndw.eugene.imagedrivebot.conversation.uploadPhoto;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.configuration.BotCommand;
 import ndw.eugene.imagedrivebot.configuration.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.conversation.UpdateProcessor;
@@ -10,6 +11,7 @@ import org.springframework.scheduling.TaskScheduler;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
@@ -67,7 +69,12 @@ public class PhotoUploadConversationProcessor {
             bot.sendMessageToChat(BotMessage.UPLOAD_START.getMessage(), update.chatId());
 
     public final UpdateProcessor descriptionProcessor = (update, bot) -> {
-        var description = update.messageTextIsNotEmpty() ? update.messageText() : "";
+        var description = "";
+        boolean skipDescription = Objects.equals(update.command(), BotCommand.SKIP_DESCRIPTION.getCommand());
+        if (!skipDescription) {
+            description = update.messageTextIsNotEmpty() ? update.messageText() : "";
+        }
+
         photosData.setDescription(description + " " + update.userId());
         bot.sendMessageToChat(BotMessage.DESCRIPTION_SAVED.getMessage(), update.chatId());
     };
