@@ -5,6 +5,7 @@ import com.google.common.collect.Table;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadConversationProcessor;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
+import ndw.eugene.imagedrivebot.exceptions.SessionExpiredException;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -17,9 +18,14 @@ public class SessionManager {
 
     public Session getSessionForUserInChat(long userId, long chatId) {
         Session session = usersSessions.get(userId, chatId);
-        if (session != null && session.isEnded()) {
+
+        if (session == null) {
+            return null;
+        } else if (session.isEnded()) {
             usersSessions.remove(userId, chatId);
             return null;
+        } else if (session.isExpired()) {
+            throw new SessionExpiredException();
         }
 
         return session;

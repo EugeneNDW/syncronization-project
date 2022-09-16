@@ -24,14 +24,11 @@ public class BotExceptionsHandler {
                 sessionManager.removeSession(message.getFrom().getId(), message.getChatId());
             }
         }
+
         System.out.println(e.getMessage());
-        if (e instanceof DocumentNotFoundException) {
+
+        if (e instanceof CustomException) {
             bot.sendMessageToChat(e.getMessage(), update.getMessage().getChatId());
-        } else if (e instanceof NotAuthorizedException) {
-            bot.sendMessageToChat(e.getMessage(), update.getMessage().getChatId());
-        } else if (e instanceof DriveSyncException) {
-            System.out.println(e.getMessage());
-            bot.sendMessageToChat(BotMessage.SERVER_ERROR.getMessage(), update.getMessage().getChatId());
         } else {
             bot.sendMessageToChat(BotMessage.GENERIC_EXCEPTION.getMessage(), update.getMessage().getChatId());
         }

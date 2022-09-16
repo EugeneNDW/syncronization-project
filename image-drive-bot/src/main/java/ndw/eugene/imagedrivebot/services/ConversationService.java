@@ -1,6 +1,7 @@
 package ndw.eugene.imagedrivebot.services;
 
 import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadConversationProcessor;
+import ndw.eugene.imagedrivebot.exceptions.SessionAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,10 @@ public class ConversationService {
     }
 
     public void startUploadFileConversation(Long userId, Long chatId) {
+        var session = sessionManager.getSessionForUserInChat(userId, chatId);
+        if (session != null) {
+            throw new SessionAlreadyExistsException();
+        }
         var conversationProcessor = new PhotoUploadConversationProcessor(fileService, scheduler);
         sessionManager.startSession(userId, chatId, conversationProcessor);
     }

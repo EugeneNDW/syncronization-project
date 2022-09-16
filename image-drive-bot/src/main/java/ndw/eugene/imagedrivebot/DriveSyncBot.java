@@ -1,9 +1,6 @@
 package ndw.eugene.imagedrivebot;
 
-import ndw.eugene.imagedrivebot.configuration.BotCommand;
-import ndw.eugene.imagedrivebot.configuration.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FileDownloadResult;
-import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.exceptions.NotAuthorizedException;
 import ndw.eugene.imagedrivebot.services.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -14,7 +11,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
-import java.util.Objects;
 import java.util.Set;
 
 import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.*;
