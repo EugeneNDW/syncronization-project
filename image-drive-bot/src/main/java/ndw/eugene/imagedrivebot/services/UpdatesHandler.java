@@ -1,10 +1,9 @@
 package ndw.eugene.imagedrivebot.services;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.configuration.BotCommand;
-import ndw.eugene.imagedrivebot.configuration.BotMessage;
+import ndw.eugene.imagedrivebot.configurations.BotCommand;
+import ndw.eugene.imagedrivebot.configurations.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
-import ndw.eugene.imagedrivebot.exceptions.SessionAlreadyExistsException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -23,7 +22,6 @@ public class UpdatesHandler {
     }
 
     public void handleUpdate(FormattedUpdate update, DriveSyncBot bot) {
-        var session = sessionManager.getSessionForUserInChat(update.userId(), update.chatId());
         if (Objects.equals(update.command(), BotCommand.START.getCommand())) {
             handleStart(update, bot);
         } else if (Objects.equals(update.command(), BotCommand.UPLOAD.getCommand())) {
@@ -32,8 +30,11 @@ public class UpdatesHandler {
             handleRenameFolder(update, bot);
         } else if (Objects.equals(update.command(), BotCommand.END_CONVERSATION.getCommand())) {
             handleEndConversation(update, bot);
-        } else if (session != null) {
-            session.process(update, bot);
+        } else {
+            var session = sessionManager.getSessionForUserInChat(update.userId(), update.chatId());
+            if (session != null) {
+                session.process(update, bot);
+            }
         }
     }
 

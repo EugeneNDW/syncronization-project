@@ -1,4 +1,4 @@
-package ndw.eugene.imagedrivebot.configuration;
+package ndw.eugene.imagedrivebot.configurations;
 
 public enum BotCommand {
     UPLOAD("/upload"),

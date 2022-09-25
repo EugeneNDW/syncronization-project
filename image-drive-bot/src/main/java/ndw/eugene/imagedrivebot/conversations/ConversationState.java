@@ -1,6 +1,6 @@
-package ndw.eugene.imagedrivebot.conversation;
+package ndw.eugene.imagedrivebot.conversations;
 
-import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadStages;
+import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadStages;
 
 public interface ConversationState {
     PhotoUploadStages getCurrentStage();

@@ -1,10 +1,10 @@
-package ndw.eugene.imagedrivebot.conversation.uploadPhoto;
+package ndw.eugene.imagedrivebot.conversations.uploadPhoto;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.configuration.BotCommand;
-import ndw.eugene.imagedrivebot.configuration.BotMessage;
+import ndw.eugene.imagedrivebot.configurations.BotCommand;
+import ndw.eugene.imagedrivebot.configurations.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
-import ndw.eugene.imagedrivebot.conversation.UpdateProcessor;
+import ndw.eugene.imagedrivebot.conversations.UpdateProcessor;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
 import ndw.eugene.imagedrivebot.services.IFileService;
 import org.springframework.scheduling.TaskScheduler;

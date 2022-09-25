@@ -1,4 +1,4 @@
-package ndw.eugene.imagedrivebot.configuration;
+package ndw.eugene.imagedrivebot.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ndw.eugene.imagedrivebot.exceptions.BotExceptionsHandler;

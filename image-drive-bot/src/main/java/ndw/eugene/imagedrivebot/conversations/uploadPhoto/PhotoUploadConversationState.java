@@ -1,6 +1,6 @@
-package ndw.eugene.imagedrivebot.conversation.uploadPhoto;
+package ndw.eugene.imagedrivebot.conversations.uploadPhoto;
 
-import ndw.eugene.imagedrivebot.conversation.ConversationState;
+import ndw.eugene.imagedrivebot.conversations.ConversationState;
 
 
 public class PhotoUploadConversationState implements ConversationState {

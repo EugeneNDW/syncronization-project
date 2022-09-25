@@ -1,4 +1,4 @@
-package ndw.eugene.imagedrivebot.conversation.uploadPhoto;
+package ndw.eugene.imagedrivebot.conversations.uploadPhoto;
 
 import org.telegram.telegrambots.meta.api.objects.Document;
 

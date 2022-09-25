@@ -1,6 +1,6 @@
 package ndw.eugene.imagedrivebot.services;
 
-import ndw.eugene.imagedrivebot.configuration.BotCommand;
+import ndw.eugene.imagedrivebot.configurations.BotCommand;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

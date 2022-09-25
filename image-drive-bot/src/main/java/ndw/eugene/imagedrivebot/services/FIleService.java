@@ -3,7 +3,7 @@ package ndw.eugene.imagedrivebot.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadData;
+import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadData;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.dto.FilesSynchronizationResponse;
 import ndw.eugene.imagedrivebot.dto.RenameFolderDto;
@@ -30,7 +30,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.RESOURCE_NAME;
+import static ndw.eugene.imagedrivebot.configurations.BotConfiguration.RESOURCE_NAME;
 import static org.apache.http.entity.ContentType.MULTIPART_FORM_DATA;
 
 @Service

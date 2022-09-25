@@ -1,7 +1,7 @@
 package ndw.eugene.imagedrivebot.services;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadData;
+import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadData;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.dto.FilesSynchronizationResponse;
 

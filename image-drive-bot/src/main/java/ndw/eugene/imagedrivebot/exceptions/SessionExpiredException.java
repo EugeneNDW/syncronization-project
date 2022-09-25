@@ -1,6 +1,6 @@
 package ndw.eugene.imagedrivebot.exceptions;
 
-import ndw.eugene.imagedrivebot.configuration.BotMessage;
+import ndw.eugene.imagedrivebot.configurations.BotMessage;
 
 public class SessionExpiredException extends CustomException {
     public SessionExpiredException() {

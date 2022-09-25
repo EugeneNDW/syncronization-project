@@ -1,8 +1,7 @@
 package ndw.eugene.imagedrivebot.exceptions;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.configuration.BotMessage;
-import ndw.eugene.imagedrivebot.exceptions.*;
+import ndw.eugene.imagedrivebot.configurations.BotMessage;
 import ndw.eugene.imagedrivebot.services.SessionManager;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;

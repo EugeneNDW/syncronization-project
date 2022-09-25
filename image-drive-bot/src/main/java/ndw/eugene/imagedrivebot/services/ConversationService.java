@@ -1,6 +1,6 @@
 package ndw.eugene.imagedrivebot.services;
 
-import ndw.eugene.imagedrivebot.conversation.uploadPhoto.PhotoUploadConversationProcessor;
+import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversationProcessor;
 import ndw.eugene.imagedrivebot.exceptions.SessionAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;

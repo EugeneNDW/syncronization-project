@@ -1,4 +1,4 @@
-package ndw.eugene.imagedrivebot.conversation;
+package ndw.eugene.imagedrivebot.conversations;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;

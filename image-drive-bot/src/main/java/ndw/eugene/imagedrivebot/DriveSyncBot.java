@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 import java.util.Set;
 
-import static ndw.eugene.imagedrivebot.configuration.BotConfiguration.*;
+import static ndw.eugene.imagedrivebot.configurations.BotConfiguration.*;
 
 public class DriveSyncBot extends TelegramLongPollingBot {
 
