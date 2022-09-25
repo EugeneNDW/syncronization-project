@@ -13,10 +13,10 @@ import java.util.Objects;
 public class UpdatesHandler {
 
     private final SessionManager sessionManager;
-    private final ConversationService conversationService;
+    private final IConversationService conversationService;
     private final IFileService fileService;
 
-    public UpdatesHandler(SessionManager sessionManager, ConversationService conversationService, IFileService fileService) {
+    public UpdatesHandler(SessionManager sessionManager, IConversationService conversationService, IFileService fileService) {
         this.sessionManager = sessionManager;
         this.conversationService = conversationService;
         this.fileService = fileService;

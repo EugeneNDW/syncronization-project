@@ -13,16 +13,18 @@ import java.time.temporal.ChronoUnit;
 
 @Component
 public class SessionManager {
-//базовый флоу работы с сессиями, пока что предполагаем что конкурентного доступа нету, потом перепишется на конкурентность
     private final Table<Long, Long, Session> usersSessions = HashBasedTable.create();
+
+    //todo храним сессии по userId, chatId
+    //todo отдаём сессию если она есть и активная
+    //todo перед отдачей сессии обновляем таймер на ней
+    //todo если время действия сессии истекло - выбрасываем ошибку
+    //todo начинаем / удаляем сессию
 
     public Session getSessionForUserInChat(long userId, long chatId) {
         Session session = usersSessions.get(userId, chatId);
 
         if (session == null) {
-            return null;
-        } else if (session.isEnded()) {
-            usersSessions.remove(userId, chatId);
             return null;
         } else if (session.isExpired()) {
             throw new SessionExpiredException();
@@ -32,7 +34,7 @@ public class SessionManager {
     }
 
     public Session startSession(long userId, long chatId, PhotoUploadConversationProcessor conversationProcessor) {
-        Session session = new Session(userId, chatId, conversationProcessor);
+        Session session = new Session(conversationProcessor);
         usersSessions.put(userId, chatId, session);
 
         return usersSessions.get(userId, chatId);
@@ -46,22 +48,20 @@ public class SessionManager {
         usersSessions.remove(userId, chatId);
     }
 
-    public boolean sessionExists(long userId, long chatId) {
-        return getSessionForUserInChat(userId, chatId) != null;
-    }
+    //todo хранит диалог
+    //todo имеет таймер для таймаута
+    //todo умеет отвечать закончилось ли время
+    //todo умеет обновлять время таймера
+    //todo умеет очищать свою информацию
 
     public static class Session {
         private static final long defaultTimeout = 3;
-        private final long chatId;
-        private final long userId;
         private final Instant startTime;
         private final long timeout;
 
-        private final PhotoUploadConversationProcessor conversationProcessor;
+        private final PhotoUploadConversationProcessor conversationProcessor; //todo переделать на дженерик
 
-        public Session(long userId, long chatId, PhotoUploadConversationProcessor conversationProcessor) {
-            this.chatId = chatId;
-            this.userId = userId;
+        public Session(PhotoUploadConversationProcessor conversationProcessor) {
             this.conversationProcessor = conversationProcessor;
 
             this.startTime = Instant.now();
@@ -70,10 +70,6 @@ public class SessionManager {
 
         public boolean isExpired() {
             return startTime.plus(timeout, ChronoUnit.MINUTES).isBefore(Instant.now());
-        }
-
-        public boolean isEnded() {
-            return getConversation().isEnded();
         }
 
         public PhotoUploadConversationProcessor getConversation() {

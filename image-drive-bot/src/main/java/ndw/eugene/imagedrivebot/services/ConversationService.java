@@ -7,7 +7,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConversationService {
+public class ConversationService implements IConversationService {
 
     @Autowired
     private final SessionManager sessionManager;
@@ -24,6 +24,7 @@ public class ConversationService {
         this.scheduler = scheduler;
     }
 
+    @Override
     public void startUploadFileConversation(Long userId, Long chatId) {
         var session = sessionManager.getSessionForUserInChat(userId, chatId);
         if (session != null) {
