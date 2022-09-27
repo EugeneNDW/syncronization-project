@@ -30,6 +30,8 @@ public class UpdatesHandler {
             handleRenameFolder(update, bot);
         } else if (Objects.equals(update.command(), BotCommand.END_CONVERSATION.getCommand())) {
             handleEndConversation(update, bot);
+        } else if (Objects.equals(update.command(), BotCommand.SAVE_HISTORY.getCommand())) {
+            handleSaveHistory(update, bot);
         } else {
             handleConversation(update, bot);
         }
@@ -54,6 +56,14 @@ public class UpdatesHandler {
 
     private void handleUpload(FormattedUpdate update, DriveSyncBot bot) {
         conversationService.startUploadFileConversation(update.userId(), update.chatId());
+        var session = sessionManager.getSessionForUserInChat(update.userId(), update.chatId());
+        if (session != null) {
+            conversationService.processConversation(update, bot, session.getConversation());
+        }
+    }
+
+    private void handleSaveHistory(FormattedUpdate update, DriveSyncBot bot) {
+        conversationService.startSaveHistoryConversation(update.userId(), update.chatId());
         var session = sessionManager.getSessionForUserInChat(update.userId(), update.chatId());
         if (session != null) {
             conversationService.processConversation(update, bot, session.getConversation());

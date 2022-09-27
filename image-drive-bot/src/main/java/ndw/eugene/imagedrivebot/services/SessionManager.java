@@ -33,7 +33,7 @@ public class SessionManager {
         return session;
     }
 
-    public Session startSession(long userId, long chatId, PhotoUploadConversation conversation) {
+    public Session startSession(long userId, long chatId, IConversation conversation) {
         Session session = new Session(conversation);
         usersSessions.put(userId, chatId, session);
 

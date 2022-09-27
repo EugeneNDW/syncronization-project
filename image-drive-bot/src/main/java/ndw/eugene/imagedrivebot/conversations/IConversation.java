@@ -5,9 +5,5 @@ import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadStages;
 public interface IConversation {
     void clearConversation();
 
-    PhotoUploadStages getCurrentStage();
-
     boolean isEnded();
-
-    void nextStage();
 }

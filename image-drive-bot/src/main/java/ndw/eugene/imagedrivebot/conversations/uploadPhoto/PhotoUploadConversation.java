@@ -29,16 +29,14 @@ public class PhotoUploadConversation implements IConversation {
     }
 
     @Override
-    public PhotoUploadStages getCurrentStage() {
-        return currentStage;
-    }
-
-    @Override
     public boolean isEnded() {
         return currentStage == PhotoUploadStages.ENDED;
     }
 
-    @Override
+    public PhotoUploadStages getCurrentStage() {
+        return currentStage;
+    }
+
     public void nextStage() {
         currentStage = PhotoUploadStages.getNextStage(currentStage);
     }

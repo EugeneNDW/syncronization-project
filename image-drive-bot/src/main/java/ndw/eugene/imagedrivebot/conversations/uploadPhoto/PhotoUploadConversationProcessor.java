@@ -33,7 +33,7 @@ public class PhotoUploadConversationProcessor {
     }
 
     public void process(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
-        UpdateProcessor processor = getStageProcessor(conversation.getCurrentStage());
+        var processor = getStageProcessor(conversation.getCurrentStage());
         processor.process(update, bot, conversation);
         nextStage(conversation);
     }
@@ -47,7 +47,7 @@ public class PhotoUploadConversationProcessor {
         }
     }
 
-    private UpdateProcessor getStageProcessor(PhotoUploadStages currentStage) {
+    private UpdateProcessor<PhotoUploadConversation> getStageProcessor(PhotoUploadStages currentStage) {
         return switch (currentStage) {
             case CONVERSATION_STARTED -> startProcessor;
             case DESCRIPTION_PROVIDED -> descriptionProcessor;
@@ -56,10 +56,10 @@ public class PhotoUploadConversationProcessor {
         };
     }
 
-    public final UpdateProcessor startProcessor = (update, bot, conversation) ->
+    public final UpdateProcessor<PhotoUploadConversation> startProcessor = (update, bot, conversation) ->
             bot.sendMessageToChat(BotMessage.UPLOAD_START.getMessage(), update.chatId());
 
-    public final UpdateProcessor descriptionProcessor = (update, bot, conversation) -> {
+    public final UpdateProcessor<PhotoUploadConversation> descriptionProcessor = (update, bot, conversation) -> {
         var description = "";
         boolean skipDescription = Objects.equals(update.command(), BotCommand.SKIP_DESCRIPTION.getCommand());
         if (!skipDescription) {
@@ -70,7 +70,7 @@ public class PhotoUploadConversationProcessor {
         bot.sendMessageToChat(BotMessage.DESCRIPTION_SAVED.getMessage(), update.chatId());
     };
 
-    public final UpdateProcessor photosProcessor = (update, bot, conversation) -> {
+    public final UpdateProcessor<PhotoUploadConversation> photosProcessor = (update, bot, conversation) -> {
         if (!update.hasDocument()) {
             throw new DocumentNotFoundException();
         }
@@ -101,7 +101,7 @@ public class PhotoUploadConversationProcessor {
         }
     };
 
-    public final UpdateProcessor endedProcessor = (update, bot, conversation) -> {
+    public final UpdateProcessor<PhotoUploadConversation> endedProcessor = (update, bot, conversation) -> {
         throw new IllegalArgumentException(BotMessage.CANT_REACH_EXCEPTION.getMessage());
     };
 
