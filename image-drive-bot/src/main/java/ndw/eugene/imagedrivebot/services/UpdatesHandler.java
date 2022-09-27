@@ -31,10 +31,15 @@ public class UpdatesHandler {
         } else if (Objects.equals(update.command(), BotCommand.END_CONVERSATION.getCommand())) {
             handleEndConversation(update, bot);
         } else {
-            var session = sessionManager.getSessionForUserInChat(update.userId(), update.chatId());
-            if (session != null) {
-                session.process(update, bot);
-            }
+            handleConversation(update, bot);
+        }
+    }
+
+    private void handleConversation(FormattedUpdate update, DriveSyncBot bot) {
+        var session = sessionManager.getSessionForUserInChat(update.userId(), update.chatId());
+        if (session != null) {
+            var conversation = session.getConversation();
+            conversationService.processConversation(update, bot, conversation);
         }
     }
 
@@ -51,7 +56,7 @@ public class UpdatesHandler {
         conversationService.startUploadFileConversation(update.userId(), update.chatId());
         var session = sessionManager.getSessionForUserInChat(update.userId(), update.chatId());
         if (session != null) {
-            session.process(update, bot);
+            conversationService.processConversation(update, bot, session.getConversation());
         }
     }
 

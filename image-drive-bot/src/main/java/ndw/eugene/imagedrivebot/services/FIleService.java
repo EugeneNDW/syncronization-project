@@ -3,7 +3,6 @@ package ndw.eugene.imagedrivebot.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadData;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.dto.FilesSynchronizationResponse;
 import ndw.eugene.imagedrivebot.dto.RenameFolderDto;
@@ -23,6 +22,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Document;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,8 +66,8 @@ public class FIleService implements IFileService {
     }
 
     @Override
-    public List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, PhotoUploadData photoData) {
-        return photoData.getDocuments()
+    public List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, String description, List<Document> documents) {
+        return documents
                 .parallelStream()
                 .map(bot::downloadFile)
                 .map(f -> {
@@ -75,7 +75,7 @@ public class FIleService implements IFileService {
                                 return sendFileToDisk(chatId, f.file(), new FileInfoDto(
                                         userId,
                                         f.fileName(),
-                                        photoData.getDescription(),
+                                        description,
                                         RESOURCE_NAME));
                             } else {
                                 return new FilesSynchronizationResponse(f.fileName(), false);

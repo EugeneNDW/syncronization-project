@@ -2,9 +2,7 @@ package ndw.eugene.imagedrivebot.services;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversationProcessor;
-import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
+import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversation;
 import ndw.eugene.imagedrivebot.exceptions.SessionExpiredException;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +21,9 @@ public class SessionManager {
 
         if (session == null) {
             return null;
+        } else if (session.isEnded()) {
+            removeSession(userId, chatId);
+            return null;
         } else if (session.isExpired()) {
             throw new SessionExpiredException();
         }
@@ -31,8 +32,8 @@ public class SessionManager {
         return session;
     }
 
-    public Session startSession(long userId, long chatId, PhotoUploadConversationProcessor conversationProcessor) {
-        Session session = new Session(conversationProcessor);
+    public Session startSession(long userId, long chatId, PhotoUploadConversation conversation) {
+        Session session = new Session(conversation);
         usersSessions.put(userId, chatId, session);
 
         return usersSessions.get(userId, chatId);
@@ -50,33 +51,33 @@ public class SessionManager {
         private Instant startTime;
         private final long timeout;
 
-        private final PhotoUploadConversationProcessor conversationProcessor; //todo переделать на дженерик
+        private final PhotoUploadConversation conversation; //todo переделать на дженерик
 
-        public Session(PhotoUploadConversationProcessor conversationProcessor) {
-            this.conversationProcessor = conversationProcessor;
+        public Session(PhotoUploadConversation conversation) {
+            this.conversation = conversation;
 
             this.startTime = Instant.now();
             this.timeout = DEFAULT_TIMEOUT;
         }
 
-        public PhotoUploadConversationProcessor getConversation() {
-            return conversationProcessor;
+        public PhotoUploadConversation getConversation() {
+            return conversation;
         }
 
         public boolean isExpired() {
             return startTime.plus(timeout, ChronoUnit.MINUTES).isBefore(Instant.now());
         }
 
+        public boolean isEnded() {
+            return conversation.isEnded();
+        }
+
         public void refreshTimeout() {
             this.startTime = Instant.now();
         }
 
-        public void process(FormattedUpdate update, DriveSyncBot bot) {
-            conversationProcessor.process(update, bot);
-        }
-
         private void close() {
-            conversationProcessor.clearConversation();
+            conversation.clearConversation();
         }
     }
 }

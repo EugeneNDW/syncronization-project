@@ -7,7 +7,9 @@ import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.conversations.UpdateProcessor;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
 import ndw.eugene.imagedrivebot.services.IFileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -15,45 +17,34 @@ import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
+@Component
 public class PhotoUploadConversationProcessor {
     private final int WAIT_FOR_UPDATES_LIMIT_IN_SEC = 30;
 
+    @Autowired
     private final IFileService fileService;
 
+    @Autowired
     private final TaskScheduler scheduler;
-
-    private final PhotoUploadConversationState conversationState = new PhotoUploadConversationState();
-
-    private final PhotoUploadData photosData = new PhotoUploadData();
-
-    private boolean isTaskDone = false;
-
-    private String mediaGroupId = null;
-
-    private ScheduledFuture<?> job = null;
 
     public PhotoUploadConversationProcessor(IFileService fileService, TaskScheduler scheduler) {
         this.fileService = fileService;
         this.scheduler = scheduler;
     }
 
-    public void process(FormattedUpdate update, DriveSyncBot bot) {
-        UpdateProcessor processor = getStageProcessor(conversationState.getCurrentStage());
-        processor.process(update, bot);
-        nextStage();
+    public void process(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
+        UpdateProcessor processor = getStageProcessor(conversation.getCurrentStage());
+        processor.process(update, bot, conversation);
+        nextStage(conversation);
     }
 
-    private void nextStage() {
-        var currentStage = conversationState.getCurrentStage();
+    private void nextStage(PhotoUploadConversation conversation) {
+        var currentStage = conversation.getCurrentStage();
         var isPhotoStage = currentStage == PhotoUploadStages.PHOTOS;
 
-        if (!isPhotoStage || isTaskDone) {
-            conversationState.nextStage();
+        if (!isPhotoStage || conversation.isTaskDone()) {
+            conversation.nextStage();
         }
-    }
-
-    public boolean isEnded() {
-        return conversationState.isEnded();
     }
 
     public UpdateProcessor getStageProcessor(PhotoUploadStages currentStage) {
@@ -65,76 +56,71 @@ public class PhotoUploadConversationProcessor {
         };
     }
 
-    public final UpdateProcessor startProcessor = (update, bot) ->
+    public final UpdateProcessor startProcessor = (update, bot, conversation) ->
             bot.sendMessageToChat(BotMessage.UPLOAD_START.getMessage(), update.chatId());
 
-    public final UpdateProcessor descriptionProcessor = (update, bot) -> {
+    public final UpdateProcessor descriptionProcessor = (update, bot, conversation) -> {
         var description = "";
         boolean skipDescription = Objects.equals(update.command(), BotCommand.SKIP_DESCRIPTION.getCommand());
         if (!skipDescription) {
             description = update.messageTextIsNotEmpty() ? update.messageText() : "";
         }
 
-        photosData.setDescription(description + " " + update.userId());
+        conversation.setDescription(description + " " + update.userId());
         bot.sendMessageToChat(BotMessage.DESCRIPTION_SAVED.getMessage(), update.chatId());
     };
 
-    public final UpdateProcessor photosProcessor = (update, bot) -> {
+    public final UpdateProcessor photosProcessor = (update, bot, conversation) -> {
         if (!update.hasDocument()) {
             throw new DocumentNotFoundException();
         }
         var updateMediaGroup = update.mediaGroupId();
         var document = update.document();
+        String mediaGroupId = conversation.getMediaGroupId();
         boolean updateHasGroup = update.hasMediaGroup();
         boolean groupIsSet = mediaGroupId != null;
+
         boolean groupIsSetAndUpdateWithoutGroup = !updateHasGroup && groupIsSet;
         boolean updateFromAnotherGroup = updateHasGroup && groupIsSet && !mediaGroupId.equals(updateMediaGroup);
         if (groupIsSetAndUpdateWithoutGroup || updateFromAnotherGroup) {
             return;
         }
 
-        photosData.addFile(document);
+        conversation.addFile(document);
 
         if (!updateHasGroup) {
-            sendPhotos(update, bot);
+            sendPhotos(update, bot, conversation);
         } else if (!groupIsSet) {
-            mediaGroupId = updateMediaGroup;
-            job = schedulePhotoUpload(update, bot);
+            conversation.setMediaGroupId(updateMediaGroup);
+            conversation.setJob(schedulePhotoUpload(update, bot, conversation));
         } else if (mediaGroupId.equals(updateMediaGroup)) {
-            if (job != null) {
-                job.cancel(false);
+            if (conversation.getJob() != null) {
+                conversation.getJob().cancel(false);
             }
-            job = schedulePhotoUpload(update, bot);
+            conversation.setJob(schedulePhotoUpload(update, bot, conversation));
         }
     };
 
-    public final UpdateProcessor endedProcessor = (update, bot) -> {
+    public final UpdateProcessor endedProcessor = (update, bot, conversation) -> {
         throw new IllegalArgumentException(BotMessage.CANT_REACH_EXCEPTION.getMessage());
     };
 
-    public void clearConversation() {
-        if (job != null) {
-            job.cancel(false);
-        }
-        photosData.getDocuments().clear();
-    }
-
-    private ScheduledFuture<?> schedulePhotoUpload(FormattedUpdate update, DriveSyncBot bot) {
+    private ScheduledFuture<?> schedulePhotoUpload(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
         return scheduler.schedule(
-                () -> sendPhotos(update, bot),
+                () -> sendPhotos(update, bot, conversation),
                 Instant.now().plus(WAIT_FOR_UPDATES_LIMIT_IN_SEC, ChronoUnit.SECONDS)
         );
     }
 
-    private void sendPhotos(FormattedUpdate update, DriveSyncBot bot) {
-        isTaskDone = true;
-        var results = fileService.synchronizeFiles(bot, update.chatId(), update.userId(), photosData);
+    private void sendPhotos(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
+        conversation.setTaskDone(true);
+        var results = fileService.synchronizeFiles(bot, update.chatId(), update.userId(), conversation.getDescription(), conversation.getDocuments());
         var result = results
                 .stream()
                 .map( r -> r.fileName() + " : " + (r.successStatus() ? "успех" : "неуспех"))
                 .collect(Collectors.joining("\n", "Загружено: \n", ""));
 
         bot.sendMessageToChat(result, update.chatId());
-        nextStage();
+        nextStage(conversation);
     }
 }

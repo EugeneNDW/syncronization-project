@@ -1,9 +1,11 @@
 package ndw.eugene.imagedrivebot.services;
 
+import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversation;
 import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversationProcessor;
+import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.exceptions.SessionAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,15 +15,11 @@ public class ConversationService implements IConversationService {
     private final SessionManager sessionManager;
 
     @Autowired
-    private final IFileService fileService;
+    private final PhotoUploadConversationProcessor uploadConversationProcessor;
 
-    @Autowired
-    private final TaskScheduler scheduler;
-
-    public ConversationService(SessionManager sessionManager, IFileService fileService, TaskScheduler scheduler) {
+    public ConversationService(SessionManager sessionManager, PhotoUploadConversationProcessor uploadConversationProcessor) {
         this.sessionManager = sessionManager;
-        this.fileService = fileService;
-        this.scheduler = scheduler;
+        this.uploadConversationProcessor = uploadConversationProcessor;
     }
 
     @Override
@@ -30,7 +28,12 @@ public class ConversationService implements IConversationService {
         if (session != null) {
             throw new SessionAlreadyExistsException();
         }
-        var conversationProcessor = new PhotoUploadConversationProcessor(fileService, scheduler);
-        sessionManager.startSession(userId, chatId, conversationProcessor);
+        var conversation = new PhotoUploadConversation();
+        sessionManager.startSession(userId, chatId, conversation);
+    }
+
+    @Override
+    public void processConversation(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
+        uploadConversationProcessor.process(update, bot, conversation);
     }
 }
