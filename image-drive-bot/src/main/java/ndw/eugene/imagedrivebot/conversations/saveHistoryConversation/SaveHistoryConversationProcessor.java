@@ -44,7 +44,7 @@ public class SaveHistoryConversationProcessor {
     }
 
     public final UpdateProcessor<SaveHistoryConversation> startProcessor = (update, bot, conversation) ->
-            bot.sendMessageToChat(BotMessage.UPLOAD_START.getMessage(), update.chatId());
+            bot.sendMessageToChat(BotMessage.HISTORY_START.getMessage(), update.chatId());
 
     public final UpdateProcessor<SaveHistoryConversation> documentProcessor = this::sendPhotos;
 
