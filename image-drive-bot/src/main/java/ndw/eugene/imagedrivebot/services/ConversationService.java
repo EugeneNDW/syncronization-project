@@ -1,6 +1,7 @@
 package ndw.eugene.imagedrivebot.services;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.conversations.IConversation;
 import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversation;
 import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversationProcessor;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
@@ -33,7 +34,9 @@ public class ConversationService implements IConversationService {
     }
 
     @Override
-    public void processConversation(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
-        uploadConversationProcessor.process(update, bot, conversation);
+    public void processConversation(FormattedUpdate update, DriveSyncBot bot, IConversation conversation) {
+        if (conversation instanceof PhotoUploadConversation photoUploadConversation) {
+            uploadConversationProcessor.process(update, bot, photoUploadConversation);
+        }
     }
 }

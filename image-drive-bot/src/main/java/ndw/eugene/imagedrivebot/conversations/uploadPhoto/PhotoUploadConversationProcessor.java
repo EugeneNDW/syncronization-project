@@ -47,7 +47,7 @@ public class PhotoUploadConversationProcessor {
         }
     }
 
-    public UpdateProcessor getStageProcessor(PhotoUploadStages currentStage) {
+    private UpdateProcessor getStageProcessor(PhotoUploadStages currentStage) {
         return switch (currentStage) {
             case CONVERSATION_STARTED -> startProcessor;
             case DESCRIPTION_PROVIDED -> descriptionProcessor;

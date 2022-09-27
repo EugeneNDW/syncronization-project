@@ -2,6 +2,7 @@ package ndw.eugene.imagedrivebot.services;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import ndw.eugene.imagedrivebot.conversations.IConversation;
 import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversation;
 import ndw.eugene.imagedrivebot.exceptions.SessionExpiredException;
 import org.springframework.stereotype.Component;
@@ -51,16 +52,16 @@ public class SessionManager {
         private Instant startTime;
         private final long timeout;
 
-        private final PhotoUploadConversation conversation; //todo переделать на дженерик
+        private final IConversation conversation;
 
-        public Session(PhotoUploadConversation conversation) {
+        public Session(IConversation conversation) {
             this.conversation = conversation;
 
             this.startTime = Instant.now();
             this.timeout = DEFAULT_TIMEOUT;
         }
 
-        public PhotoUploadConversation getConversation() {
+        public IConversation getConversation() {
             return conversation;
         }
 

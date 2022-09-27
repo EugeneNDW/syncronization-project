@@ -1,12 +1,13 @@
 package ndw.eugene.imagedrivebot.conversations.uploadPhoto;
 
+import ndw.eugene.imagedrivebot.conversations.IConversation;
 import org.telegram.telegrambots.meta.api.objects.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
-public class PhotoUploadConversation {
+public class PhotoUploadConversation implements IConversation {
     private PhotoUploadStages currentStage = PhotoUploadStages.CONVERSATION_STARTED;
 
     private String mediaGroupId = null;
@@ -18,6 +19,29 @@ public class PhotoUploadConversation {
     private boolean isTaskDone = false;
 
     private ScheduledFuture<?> job = null;
+
+    @Override
+    public void clearConversation() {
+        if (job != null) {
+            job.cancel(false);
+        }
+        documents.clear();
+    }
+
+    @Override
+    public PhotoUploadStages getCurrentStage() {
+        return currentStage;
+    }
+
+    @Override
+    public boolean isEnded() {
+        return currentStage == PhotoUploadStages.ENDED;
+    }
+
+    @Override
+    public void nextStage() {
+        currentStage = PhotoUploadStages.getNextStage(currentStage);
+    }
 
     public boolean isTaskDone() {
         return isTaskDone;
@@ -41,25 +65,6 @@ public class PhotoUploadConversation {
 
     public void setJob(ScheduledFuture<?> job) {
         this.job = job;
-    }
-
-    public void clearConversation() {
-        if (job != null) {
-            job.cancel(false);
-        }
-        documents.clear();
-    }
-
-    public PhotoUploadStages getCurrentStage() {
-        return currentStage;
-    }
-
-    public boolean isEnded() {
-        return currentStage == PhotoUploadStages.ENDED;
-    }
-
-    public void nextStage() {
-        currentStage = PhotoUploadStages.getNextStage(currentStage);
     }
 
     public void addFile(Document file) {
