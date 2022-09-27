@@ -28,6 +28,8 @@ public class DriveSyncBot extends TelegramLongPollingBot {
 
     private final UpdatesHandler updatesHandler;
 
+    private final IValidationService validationService;
+
     private final Set<Long> admins = Set.of(41809406L, 136094717L, 115364294L, 95263058L);
 
     public DriveSyncBot(
@@ -35,12 +37,14 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             String botToken,
             BotExceptionsHandler exceptionsHandler,
             UpdateMapper updateMapper,
-            UpdatesHandler updatesHandler) {
+            UpdatesHandler updatesHandler,
+            IValidationService validationService) {
         this.exceptionsHandler = exceptionsHandler;
         this.botToken = botToken;
         this.botName = botName;
         this.updateMapper = updateMapper;
         this.updatesHandler = updatesHandler;
+        this.validationService = validationService;
     }
 
     @Override
@@ -56,7 +60,7 @@ public class DriveSyncBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            if (!checkUpdateHasMessage(update) || !checkUpdateFromUser(update)) {
+            if (!validationService.checkUpdateHasMessage(update) || !validationService.checkUpdateFromUser(update)) {
                 return;
             }
 
@@ -105,14 +109,4 @@ public class DriveSyncBot extends TelegramLongPollingBot {
             throw new RuntimeException(e); //todo переделать обработку ошибки
         }
     }
-
-    //todo extract to validator
-    private boolean checkUpdateHasMessage(Update update) {
-        return update.getMessage() != null;
-    }
-
-    private boolean checkUpdateFromUser(Update update) {
-        return update.getMessage().getFrom() != null;
-    }
-
 }

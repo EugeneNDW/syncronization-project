@@ -46,9 +46,10 @@ public class BotConfiguration {
     @Bean
     public DriveSyncBot getDriveSyncBot(BotExceptionsHandler exceptionsHandler,
                                         UpdateMapper updateMapper,
-                                        UpdatesHandler updatesHandler) {
+                                        UpdatesHandler updatesHandler,
+                                        IValidationService validationService) {
 
-        return new DriveSyncBot(botName, botToken, exceptionsHandler, updateMapper, updatesHandler);
+        return new DriveSyncBot(botName, botToken, exceptionsHandler, updateMapper, updatesHandler, validationService);
     }
 
     @Bean

@@ -7,6 +7,7 @@ import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.conversations.UpdateProcessor;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
 import ndw.eugene.imagedrivebot.services.IFileService;
+import ndw.eugene.imagedrivebot.services.IValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -25,10 +26,14 @@ public class PhotoUploadConversationProcessor {
     private final IFileService fileService;
 
     @Autowired
+    private IValidationService validationService;
+
+    @Autowired
     private final TaskScheduler scheduler;
 
-    public PhotoUploadConversationProcessor(IFileService fileService, TaskScheduler scheduler) {
+    public PhotoUploadConversationProcessor(IFileService fileService, IValidationService validationService, TaskScheduler scheduler) {
         this.fileService = fileService;
+        this.validationService = validationService;
         this.scheduler = scheduler;
     }
 
@@ -71,9 +76,8 @@ public class PhotoUploadConversationProcessor {
     };
 
     public final UpdateProcessor<PhotoUploadConversation> photosProcessor = (update, bot, conversation) -> {
-        if (!update.hasDocument()) {
-            throw new DocumentNotFoundException();
-        }
+        validationService.checkUpdateHasDocument(update);
+
         var updateMediaGroup = update.mediaGroupId();
         var document = update.document();
         String mediaGroupId = conversation.getMediaGroupId();

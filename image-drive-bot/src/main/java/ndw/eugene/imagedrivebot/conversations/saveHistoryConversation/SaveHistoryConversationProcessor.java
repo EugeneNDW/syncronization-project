@@ -6,6 +6,7 @@ import ndw.eugene.imagedrivebot.conversations.UpdateProcessor;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
 import ndw.eugene.imagedrivebot.services.IFileService;
+import ndw.eugene.imagedrivebot.services.IValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +21,12 @@ public class SaveHistoryConversationProcessor {
     @Autowired
     private final IFileService fileService;
 
-    public SaveHistoryConversationProcessor(IFileService fileService) {
+    @Autowired
+    private final IValidationService validationService;
+
+    public SaveHistoryConversationProcessor(IFileService fileService, IValidationService validationService) {
         this.fileService = fileService;
+        this.validationService = validationService;
     }
 
     public void process(FormattedUpdate update, DriveSyncBot bot, SaveHistoryConversation conversation) {
@@ -52,9 +57,7 @@ public class SaveHistoryConversationProcessor {
     }
 
     private void sendPhotos(FormattedUpdate update, DriveSyncBot bot, SaveHistoryConversation conversation) {
-        if (!update.hasDocument()) {
-            throw new DocumentNotFoundException();
-        }
+        validationService.checkUpdateHasDocument(update);
         var results = fileService.synchronizeFiles(bot,
                 update.chatId(),
                 update.userId(),
