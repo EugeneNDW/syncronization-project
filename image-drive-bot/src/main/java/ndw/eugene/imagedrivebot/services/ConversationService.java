@@ -41,14 +41,6 @@ public class ConversationService implements IConversationService {
         startConversation(userId, chatId, conversation);
     }
 
-    private void startConversation(Long userId, Long chatId, IConversation conversation) {
-        var session = sessionManager.getSessionForUserInChat(userId, chatId);
-        if (session != null) {
-            throw new SessionAlreadyExistsException();
-        }
-        sessionManager.startSession(userId, chatId, conversation);
-    }
-
     @Override
     public void processConversation(FormattedUpdate update, DriveSyncBot bot, IConversation conversation) {
         if (conversation instanceof PhotoUploadConversation photoUploadConversation) {
@@ -56,5 +48,13 @@ public class ConversationService implements IConversationService {
         } else if (conversation instanceof SaveHistoryConversation saveHistoryConversation) {
             saveHistoryConversationProcessor.process(update, bot, saveHistoryConversation);
         }
+    }
+
+    private void startConversation(Long userId, Long chatId, IConversation conversation) {
+        var session = sessionManager.getSessionForUserInChat(userId, chatId);
+        if (session != null) {
+            throw new SessionAlreadyExistsException();
+        }
+        sessionManager.startSession(userId, chatId, conversation);
     }
 }

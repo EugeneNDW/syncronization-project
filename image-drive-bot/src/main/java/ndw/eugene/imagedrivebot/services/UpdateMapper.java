@@ -40,7 +40,7 @@ public class UpdateMapper {
             }
         }
 
-        return new FormattedUpdate(chatId, userId, messageText, command, parameter, mediaGroupId, message, document);
+        return new FormattedUpdate(userId, chatId, messageText, command, parameter, mediaGroupId, message, document);
     }
 
     private boolean validateCommand(String command) {

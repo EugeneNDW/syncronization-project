@@ -4,8 +4,8 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 public record FormattedUpdate(
-        long chatId,
         long userId,
+        long chatId,
         String messageText,
         String command,
         String parameter,
