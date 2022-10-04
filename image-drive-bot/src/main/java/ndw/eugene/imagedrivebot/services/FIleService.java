@@ -41,28 +41,11 @@ public class FIleService implements IFileService {
 
     private final String diskUrl;
 
+    private final String infoPartName = "fileInfo";
+
     public FIleService(ObjectMapper objectMapper, @Value("${application.driveservice.url}") String diskUrl) {
         this.objectMapper = objectMapper;
         this.diskUrl = diskUrl;
-    }
-
-    @Override
-    public FilesSynchronizationResponse sendFileToDisk(long chatId, File fileToDisk, FileInfoDto fileInfo) {
-        FormBodyPart filePart = createFilePart(fileToDisk);
-        var body = objectToJSON(fileInfo);
-        var entity = MultipartEntityBuilder
-                .create()
-                .addPart(filePart)
-                .addPart("fileInfo", new StringBody(body, ContentType.APPLICATION_JSON))
-                .build();
-
-        HttpPost request = new HttpPost(diskUrl + "/" + chatId + "/files");
-        request.setEntity(entity);
-
-        var responseResult = makeHttpRequest(request);
-        var syncSuccess = responseResult.getStatusCode() < 400;
-
-        return new FilesSynchronizationResponse(fileInfo.name(), syncSuccess);
     }
 
     @Override
@@ -82,6 +65,25 @@ public class FIleService implements IFileService {
                             }
                         }
                 ).toList();
+    }
+
+    @Override
+    public FilesSynchronizationResponse sendFileToDisk(long chatId, File fileToDisk, FileInfoDto fileInfo) {
+        FormBodyPart filePart = createFilePart(fileToDisk);
+        var body = objectToJSON(fileInfo);
+        var entity = MultipartEntityBuilder
+                .create()
+                .addPart(filePart)
+                .addPart(infoPartName, new StringBody(body, ContentType.APPLICATION_JSON))
+                .build();
+
+        HttpPost request = new HttpPost(diskUrl + "/" + chatId + "/files");
+        request.setEntity(entity);
+
+        var responseResult = makeHttpRequest(request);
+        var syncSuccess = responseResult.getStatusCode() < 400;
+
+        return new FilesSynchronizationResponse(fileInfo.name(), syncSuccess);
     }
 
     @Override

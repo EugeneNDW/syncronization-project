@@ -3,7 +3,6 @@ package ndw.eugene.imagedrivebot.services;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import ndw.eugene.imagedrivebot.conversations.IConversation;
-import ndw.eugene.imagedrivebot.conversations.uploadPhoto.PhotoUploadConversation;
 import ndw.eugene.imagedrivebot.exceptions.SessionExpiredException;
 import org.springframework.stereotype.Component;
 

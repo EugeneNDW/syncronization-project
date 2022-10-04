@@ -30,12 +30,12 @@ public class UpdateMapper {
         var document = message.getDocument();
 
         if (stringIsNotEmpty(messageText)) {
-            var splittedMessage = messageText.split(" ", 2);
-            var updateCommand = splittedMessage[0].replace("@" + botName, "");
+            var splitMessage = messageText.split(" ", 2);
+            var updateCommand = splitMessage[0].replace("@" + botName, "");
             if (validateCommand(updateCommand)) {
                 command = updateCommand;
-                if (splittedMessage.length == 2) {
-                    parameter = splittedMessage[1];
+                if (splitMessage.length == 2) {
+                    parameter = splitMessage[1];
                 }
             }
         }
