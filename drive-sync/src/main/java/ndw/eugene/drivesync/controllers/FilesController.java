@@ -4,6 +4,7 @@ import com.google.api.services.drive.model.File;
 import ndw.eugene.drivesync.dto.FileInfoDto;
 import ndw.eugene.drivesync.services.IGoogleDriveService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,11 +21,6 @@ public class FilesController {
         this.driveService = driveService;
     }
 
-    @GetMapping
-    public List<File> showAllFiles() {
-        return driveService.showAllFiles();
-    }
-
     @PostMapping
     public String uploadFiles(
             @PathVariable("chatId") long chatId,
@@ -39,6 +35,12 @@ public class FilesController {
     @DeleteMapping("/{fileId}")
     public String deleteFile(@PathVariable("fileId") String fileId) {
         return driveService.deleteFileById(fileId);
+    }
+
+    @GetMapping
+    public FileSystemResource searchFile(@PathVariable("chatId") long chatId, @RequestParam("query") String query) {
+        var file = driveService.searchFile(chatId, query);
+        return new FileSystemResource(file);
     }
 
     private java.io.File multipartToFile(MultipartFile file, String fileName) throws IOException {

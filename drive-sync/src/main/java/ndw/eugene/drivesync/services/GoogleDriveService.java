@@ -13,6 +13,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -71,6 +72,21 @@ public class GoogleDriveService implements IGoogleDriveService {
         try {
             drive.files().delete(fileId).execute();
             return "success";
+        } catch (IOException e) {
+            throw new DriveException(e);
+        }
+    }
+
+    @Override
+    public java.io.File searchFile(Long chatId, String query) {
+        var file = fileInfoService.searchAnyFile(chatId, query);
+
+        try {
+            var convFile = new java.io.File(System.getProperty("java.io.tmpdir"), file.getName());
+            try (var fileOutputStream = new FileOutputStream(convFile)) {
+                drive.files().get(file.getFileId()).executeMediaAndDownloadTo(fileOutputStream);
+                return convFile;
+            }
         } catch (IOException e) {
             throw new DriveException(e);
         }
