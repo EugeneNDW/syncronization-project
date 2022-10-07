@@ -1,4 +1,4 @@
-package ndw.eugene.imagedrivebot.services;
+package ndw.eugene.imagedrivebot.components;
 
 import ndw.eugene.imagedrivebot.configurations.BotCommand;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;

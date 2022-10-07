@@ -1,7 +1,9 @@
 package ndw.eugene.imagedrivebot;
 
+import ndw.eugene.imagedrivebot.components.UpdateMapper;
+import ndw.eugene.imagedrivebot.components.UpdatesHandler;
 import ndw.eugene.imagedrivebot.dto.FileDownloadResult;
-import ndw.eugene.imagedrivebot.exceptions.BotExceptionsHandler;
+import ndw.eugene.imagedrivebot.components.BotExceptionsHandler;
 import ndw.eugene.imagedrivebot.exceptions.NotAuthorizedException;
 import ndw.eugene.imagedrivebot.services.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

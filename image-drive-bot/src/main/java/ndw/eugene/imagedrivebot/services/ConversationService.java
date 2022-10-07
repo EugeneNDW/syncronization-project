@@ -1,6 +1,7 @@
 package ndw.eugene.imagedrivebot.services;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.components.SessionManager;
 import ndw.eugene.imagedrivebot.conversations.IConversation;
 import ndw.eugene.imagedrivebot.conversations.saveHistoryConversation.SaveHistoryConversation;
 import ndw.eugene.imagedrivebot.conversations.saveHistoryConversation.SaveHistoryConversationProcessor;

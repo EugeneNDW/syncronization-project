@@ -1,4 +1,4 @@
-package ndw.eugene.imagedrivebot.services;
+package ndw.eugene.imagedrivebot.components;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;

@@ -1,9 +1,12 @@
-package ndw.eugene.imagedrivebot.services;
+package ndw.eugene.imagedrivebot.components;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.components.SessionManager;
 import ndw.eugene.imagedrivebot.configurations.BotCommand;
 import ndw.eugene.imagedrivebot.configurations.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
+import ndw.eugene.imagedrivebot.services.IConversationService;
+import ndw.eugene.imagedrivebot.services.IFileService;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;

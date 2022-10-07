@@ -1,7 +1,9 @@
 package ndw.eugene.imagedrivebot.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ndw.eugene.imagedrivebot.exceptions.BotExceptionsHandler;
+import ndw.eugene.imagedrivebot.components.UpdateMapper;
+import ndw.eugene.imagedrivebot.components.UpdatesHandler;
+import ndw.eugene.imagedrivebot.components.BotExceptionsHandler;
 import ndw.eugene.imagedrivebot.services.*;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
 import org.springframework.beans.factory.annotation.Value;
