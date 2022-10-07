@@ -16,7 +16,7 @@ public class SaveHistoryConversation implements IConversation {
 
     @Override
     public boolean isEnded() {
-        return false;
+        return currentStage == SaveHistoryStages.ENDED;
     }
 
     public void nextStage() {
