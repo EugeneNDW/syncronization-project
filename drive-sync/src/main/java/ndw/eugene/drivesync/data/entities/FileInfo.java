@@ -14,10 +14,16 @@ public class FileInfo {
     private Long userId;
 
     @Column(nullable = false)
+    private Long chatId;
+
+    @Column(nullable = false)
     private String fileId;
 
     @Column(nullable = false)
     private String source;
+
+    @Column(nullable = false)
+    private String name;
 
     @Column(nullable = false)
     private String description;
@@ -38,6 +44,14 @@ public class FileInfo {
         this.userId = userId;
     }
 
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
+    }
+
     public String getFileId() {
         return fileId;
     }
@@ -52,6 +66,14 @@ public class FileInfo {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

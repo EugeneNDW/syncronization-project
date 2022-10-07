@@ -70,3 +70,23 @@ databaseChangeLog:
                   type: text
                   constraints:
                     nullable: false
+  - changeSet:
+      id: 3
+      author: eugenendw
+      changes:
+        - addColumn:
+            tableName: file_info
+            columns:
+              - column:
+                  name: name
+                  type: text
+                  defaultValue: ''
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: chat_id
+                  type: bigint
+                  defaultValue: -1
+                  constraints:
+                    nullable: false

@@ -57,7 +57,7 @@ public class GoogleDriveService implements IGoogleDriveService {
 
             System.out.println("File ID: " + gdFile.getId());
 
-            FileInfo fileInfo = createFileInfo(fileInfoDto, gdFile);
+            var fileInfo = createFileInfo(chatId, fileInfoDto, gdFile);
             fileInfoService.saveFileInfo(fileInfo);
 
             return gdFile;
@@ -113,12 +113,14 @@ public class GoogleDriveService implements IGoogleDriveService {
         }
     }
 
-    private FileInfo createFileInfo(FileInfoDto fileInfoDto, File gdFile) {
+    private FileInfo createFileInfo(long chatId, FileInfoDto fileInfoDto, File gdFile) {
         FileInfo fileInfo = new FileInfo();
+        fileInfo.setName(fileInfoDto.name());
         fileInfo.setDescription(fileInfoDto.description());
         fileInfo.setSource(fileInfoDto.resource());
         fileInfo.setFileId(gdFile.getId());
         fileInfo.setUserId(fileInfoDto.userId());
+        fileInfo.setChatId(chatId);
         return fileInfo;
     }
 
