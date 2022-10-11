@@ -6,10 +6,10 @@ import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.dto.FilesSynchronizationResponse;
 import ndw.eugene.imagedrivebot.dto.RenameFolderDto;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPost;
+import ndw.eugene.imagedrivebot.exceptions.CustomException;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.FormBodyPart;
@@ -25,9 +25,12 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Document;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 
 import static ndw.eugene.imagedrivebot.configurations.BotConfiguration.RESOURCE_NAME;
@@ -81,7 +84,7 @@ public class FIleService implements IFileService {
         request.setEntity(entity);
 
         var responseResult = makeHttpRequest(request);
-        var syncSuccess = responseResult.getStatusCode() < 400;
+        var syncSuccess = responseResult.getStatusLine().getStatusCode() < 400;
 
         return new FilesSynchronizationResponse(fileInfo.name(), syncSuccess);
     }
@@ -95,6 +98,13 @@ public class FIleService implements IFileService {
 
         makeHttpRequest(request);
     }
+
+    @Override
+    public File searchFile(long chatId, String query) {
+        var request = new HttpGet(diskUrl + "/" + chatId + "/files?query=" + query);
+        return downloadFile(request);
+    }
+
 
     private FormBodyPart createFilePart(File fileToDisk) {
         var fileUTF8Name = "UTF-8''" + URLEncoder.encode(fileToDisk.getName(), StandardCharsets.UTF_8);
@@ -119,11 +129,31 @@ public class FIleService implements IFileService {
         }
     }
 
-    private StatusLine makeHttpRequest(HttpEntityEnclosingRequestBase request) {
+    private File downloadFile(HttpRequestBase request) {
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             try (CloseableHttpResponse response = httpclient.execute(request)) {
                 System.out.println(response);
-                return response.getStatusLine();
+                var entity = response.getEntity();
+                InputStream is = entity.getContent();
+                var disp = response.getHeaders("Content-Disposition");
+                String fileName = disp[0].getElements()[0].getValue();
+                var file = new java.io.File(System.getProperty("java.io.tmpdir"), "tmp" + System.currentTimeMillis() + fileName);
+                try (FileOutputStream fos = new FileOutputStream(file, false)) {
+                    is.transferTo(fos);
+                }
+
+                return file;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e); //todo custom exception
+        }
+    }
+
+    private HttpResponse makeHttpRequest(HttpRequestBase request) {
+        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+            try (CloseableHttpResponse response = httpclient.execute(request)) {
+                System.out.println(response);
+                return response;
             }
         } catch (IOException e) {
             throw new RuntimeException(e); //todo custom exception

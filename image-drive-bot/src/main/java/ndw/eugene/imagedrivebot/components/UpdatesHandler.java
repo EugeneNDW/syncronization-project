@@ -1,7 +1,6 @@
 package ndw.eugene.imagedrivebot.components;
 
 import ndw.eugene.imagedrivebot.DriveSyncBot;
-import ndw.eugene.imagedrivebot.components.SessionManager;
 import ndw.eugene.imagedrivebot.configurations.BotCommand;
 import ndw.eugene.imagedrivebot.configurations.BotMessage;
 import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
@@ -35,6 +34,8 @@ public class UpdatesHandler {
             handleEndConversation(update, bot);
         } else if (Objects.equals(update.command(), BotCommand.SAVE_HISTORY.getCommand())) {
             handleSaveHistory(update, bot);
+        } else if (Objects.equals(update.command(), BotCommand.RANDOM_HISTORY.getCommand())) {
+            handleRandomHistory(update, bot);
         } else {
             handleConversation(update, bot);
         }
@@ -76,5 +77,10 @@ public class UpdatesHandler {
     private void handleRenameFolder(FormattedUpdate update, DriveSyncBot bot) {
         fileService.renameChatFolder(update.chatId(), update.parameter());
         bot.sendMessageToChat(BotMessage.RENAME_FOLDER_SUCCESS.getMessage(), update.chatId());
+    }
+
+    private void handleRandomHistory(FormattedUpdate update, DriveSyncBot bot) {
+        var file = fileService.searchFile(update.chatId(), "history");
+        bot.sendFileToChat(file, update.chatId());
     }
 }

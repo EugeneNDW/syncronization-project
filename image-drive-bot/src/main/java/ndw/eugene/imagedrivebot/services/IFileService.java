@@ -14,4 +14,6 @@ public interface IFileService {
     List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, String description, List<Document> documents);
 
     void renameChatFolder(long chatId, String newFolderName);
+
+    File searchFile(long chatId, String query);
 }
