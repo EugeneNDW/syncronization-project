@@ -29,7 +29,7 @@ public class DriveSyncExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = IOException.class)
-    public ResponseEntity<Object> ioExceptionHandler(RuntimeException ex, WebRequest request) {
+    public ResponseEntity<Object> ioExceptionHandler(Exception ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_GATEWAY, request);
     }
 
