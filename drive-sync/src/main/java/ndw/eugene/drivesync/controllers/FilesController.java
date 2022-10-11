@@ -8,8 +8,8 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/{chatId}/files")
@@ -38,8 +38,9 @@ public class FilesController {
     }
 
     @GetMapping
-    public FileSystemResource searchFile(@PathVariable("chatId") long chatId, @RequestParam("query") String query) {
+    public FileSystemResource searchFile(@PathVariable("chatId") long chatId, @RequestParam("query") String query, HttpServletResponse response) {
         var file = driveService.searchFile(chatId, query);
+        response.setHeader("Content-Disposition", "filename=\"" + file.getName() + "\"");
         return new FileSystemResource(file);
     }
 

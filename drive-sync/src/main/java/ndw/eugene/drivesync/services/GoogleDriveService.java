@@ -109,13 +109,17 @@ public class GoogleDriveService implements IGoogleDriveService {
         }
     }
 
-    private FileContent fileToFileContent(@NonNull java.io.File file) {
+    private String detectMimeType(java.io.File file) {
         try {
-            String fileMimeType = tika.detect(file);
-            return new FileContent(fileMimeType, file);
+            return tika.detect(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private FileContent fileToFileContent(@NonNull java.io.File file) {
+        String fileMimeType = detectMimeType(file);
+        return new FileContent(fileMimeType, file);
     }
 
     private void logFiles(List<File> files) {
