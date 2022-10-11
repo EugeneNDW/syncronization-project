@@ -6,6 +6,8 @@ import ndw.eugene.drivesync.exceptions.FileNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 @Service
 public class FileInfoService implements IFileInfoService{
 
@@ -28,6 +30,6 @@ public class FileInfoService implements IFileInfoService{
             throw new FileNotFoundException(query);
         }
 
-        return files.get(0);
+        return files.get(new Random().nextInt(files.size()));
     }
 }
