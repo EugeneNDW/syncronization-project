@@ -1,9 +1,12 @@
 package ndw.eugene.drivesync.data.entities;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "drive_folder")
+@EntityListeners(AuditingEntityListener.class)
 public class DriveFolder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +20,9 @@ public class DriveFolder {
 
     @Column(nullable = false)
     private String folderId;
+
+    @Embedded
+    private CreatedInfo createdInfo = new CreatedInfo();
 
     public Long getId() {
         return id;

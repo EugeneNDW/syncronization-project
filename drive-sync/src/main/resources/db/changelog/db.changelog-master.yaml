@@ -90,3 +90,33 @@ databaseChangeLog:
                   defaultValue: -1
                   constraints:
                     nullable: false
+  - changeSet:
+      id: 4
+      author: eugenendw
+      changes:
+        - addColumn:
+            tableName: file_info
+            columns:
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    - nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  constraints:
+                    - nullable: false
+        - addColumn:
+            tableName: drive_folder
+            columns:
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    - nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  constraints:
+                    - nullable: false

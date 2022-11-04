@@ -1,9 +1,12 @@
 package ndw.eugene.drivesync.data.entities;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "file_info")
+@EntityListeners(AuditingEntityListener.class)
 public class FileInfo {
 
     @Id
@@ -27,6 +30,9 @@ public class FileInfo {
 
     @Column(nullable = false)
     private String description;
+
+    @Embedded
+    private CreatedInfo createdInfo = new CreatedInfo();
 
     public Long getId() {
         return id;
