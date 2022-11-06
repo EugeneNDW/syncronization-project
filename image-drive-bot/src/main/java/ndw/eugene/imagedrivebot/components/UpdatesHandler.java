@@ -36,6 +36,8 @@ public class UpdatesHandler {
             handleSaveHistory(update, bot);
         } else if (Objects.equals(update.command(), BotCommand.RANDOM_HISTORY.getCommand())) {
             handleRandomHistory(update, bot);
+        } else if (Objects.equals(update.command(), BotCommand.CREATE_FOLDER.getCommand())) {
+            handleCreateFolder(update, bot);
         } else {
             handleConversation(update, bot);
         }
@@ -74,8 +76,13 @@ public class UpdatesHandler {
         }
     }
 
+    private void handleCreateFolder(FormattedUpdate update, DriveSyncBot bot) {
+        fileService.createChatFolder(update.chatId(), update.hasParameter() ? update.parameter() : update.chatId() + "");
+        bot.sendMessageToChat(BotMessage.CREATE_FOLDER_SUCCESS.getMessage(), update.chatId());
+    }
+
     private void handleRenameFolder(FormattedUpdate update, DriveSyncBot bot) {
-        fileService.renameChatFolder(update.chatId(), update.parameter());
+        fileService.renameChatFolder(update.chatId(), update.hasParameter() ? update.parameter() : update.chatId() + "");
         bot.sendMessageToChat(BotMessage.RENAME_FOLDER_SUCCESS.getMessage(), update.chatId());
     }
 

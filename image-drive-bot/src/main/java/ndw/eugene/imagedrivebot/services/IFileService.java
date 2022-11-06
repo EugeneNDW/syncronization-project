@@ -15,5 +15,7 @@ public interface IFileService {
 
     void renameChatFolder(long chatId, String newFolderName);
 
+    void createChatFolder(long chatId, String folderName);
+
     File searchFile(long chatId, String query);
 }

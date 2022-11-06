@@ -19,7 +19,7 @@ public record FormattedUpdate(
     }
 
     public boolean hasParameter() {
-        return parameter != null;
+        return !parameter.isBlank();
     }
 
     public boolean hasDocument() {

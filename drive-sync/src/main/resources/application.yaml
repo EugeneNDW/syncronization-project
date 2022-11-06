@@ -14,5 +14,6 @@ spring:
     username: "${DATABASE_USERNAME}"
     password: "${DATABASE_PASSWORD}"
     driverClassName: org.postgresql.Driver
-logging.level:
-  org.springframework.web: DEBUG
+logging.level.org.springframework:
+    web: DEBUG
+    transaction.interceptor: TRACE

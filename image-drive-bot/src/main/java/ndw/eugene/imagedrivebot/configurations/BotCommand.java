@@ -7,6 +7,7 @@ public enum BotCommand {
     END_CONVERSATION("/endconv"),
     START("/start"),
     RENAME_FOLDER("/rename_f"),
+    CREATE_FOLDER("/create_f"),
     SKIP_DESCRIPTION("/skip");
 
     private final String command;

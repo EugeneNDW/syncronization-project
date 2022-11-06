@@ -3,11 +3,12 @@ package ndw.eugene.imagedrivebot.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
+import ndw.eugene.imagedrivebot.dto.CreateFolderDto;
 import ndw.eugene.imagedrivebot.dto.FileInfoDto;
 import ndw.eugene.imagedrivebot.dto.FilesSynchronizationResponse;
 import ndw.eugene.imagedrivebot.dto.RenameFolderDto;
-import ndw.eugene.imagedrivebot.exceptions.CustomException;
-import org.apache.http.Header;
+import ndw.eugene.imagedrivebot.exceptions.FolderAlreadyExistsException;
+import ndw.eugene.imagedrivebot.exceptions.FolderNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.List;
 
 import static ndw.eugene.imagedrivebot.configurations.BotConfiguration.RESOURCE_NAME;
@@ -96,7 +96,23 @@ public class FIleService implements IFileService {
         var request = new HttpPost(diskUrl + "/" + chatId + "/folders/name");
         request.setEntity(requestEntity);
 
-        makeHttpRequest(request);
+        var responseResult = makeHttpRequest(request);
+        if (responseResult.getStatusLine().getStatusCode() == 404) {
+            throw new FolderNotFoundException();
+        }
+    }
+
+    @Override
+    public void createChatFolder(long chatId, String folderName) {
+        var body = objectToJSON(new CreateFolderDto(folderName));
+        var requestEntity = new StringEntity(body, ContentType.APPLICATION_JSON);
+        var request = new HttpPost(diskUrl + "/" + chatId + "/folders");
+        request.setEntity(requestEntity);
+
+       var responseResult = makeHttpRequest(request);
+       if (responseResult.getStatusLine().getStatusCode() == 409) {
+           throw new FolderAlreadyExistsException();
+       }
     }
 
     @Override

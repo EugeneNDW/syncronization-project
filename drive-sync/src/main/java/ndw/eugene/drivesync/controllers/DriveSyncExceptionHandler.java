@@ -1,9 +1,6 @@
 package ndw.eugene.drivesync.controllers;
 
-import ndw.eugene.drivesync.exceptions.DriveException;
-import ndw.eugene.drivesync.exceptions.FileNotFoundException;
-import ndw.eugene.drivesync.exceptions.FolderNotFoundException;
-import ndw.eugene.drivesync.exceptions.TikaException;
+import ndw.eugene.drivesync.exceptions.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +33,11 @@ public class DriveSyncExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = FolderNotFoundException.class)
     public ResponseEntity<Object> folderNotFoundException(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(value = FolderAlreadyExistsException.class)
+    public ResponseEntity<Object> folderAlreadyExists(RuntimeException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler(value = FileNotFoundException.class)
