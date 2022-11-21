@@ -120,3 +120,17 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     - nullable: false
+
+  - changeSet:
+      id: 5
+      author: eugenendw
+      changes:
+        - addColumn:
+            tableName: file_info
+            columns:
+              - column:
+                  name: is_history
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    - nullable: false

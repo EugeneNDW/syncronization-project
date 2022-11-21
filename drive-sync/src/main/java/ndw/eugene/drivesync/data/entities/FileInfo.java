@@ -31,6 +31,9 @@ public class FileInfo {
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private boolean isHistory;
+
     @Embedded
     private CreatedInfo createdInfo = new CreatedInfo();
 
@@ -88,5 +91,13 @@ public class FileInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isHistory() {
+        return isHistory;
+    }
+
+    public void setHistory(boolean history) {
+        isHistory = history;
     }
 }

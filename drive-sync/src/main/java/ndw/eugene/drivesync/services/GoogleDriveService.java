@@ -3,7 +3,6 @@ package ndw.eugene.drivesync.services;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.FileList;
 import ndw.eugene.drivesync.data.entities.FileInfo;
 import ndw.eugene.drivesync.dto.FileInfoDto;
 import ndw.eugene.drivesync.exceptions.DriveException;
@@ -22,88 +21,38 @@ import java.util.List;
 @Transactional
 public class GoogleDriveService implements IGoogleDriveService {
     @Autowired
-    private final IFileInfoService fileInfoService;
-
-    @Autowired
-    private final IFolderService folderService;
-
-    @Autowired
     private final Drive drive;
 
     @Autowired
     private final Tika tika;
 
-    public GoogleDriveService(final IFileInfoService fileInfoService,
-                              final IFolderService folderService,
-                              final Drive drive,
-                              final Tika tika) {
-        this.fileInfoService = fileInfoService;
-        this.folderService = folderService;
+    public GoogleDriveService(final Drive drive, final Tika tika) {
         this.drive = drive;
         this.tika = tika;
     }
 
     @Override
-    public File uploadFIle(long chatId, java.io.File filePath, FileInfoDto fileInfoDto) {
-        var folderId = folderService.getFolderByChatId(chatId);
-
-        File metadata = createMetadataFromFileInfo(filePath, fileInfoDto, folderId.getFolderId());
+    public File uploadFIle(String folderId, java.io.File filePath, FileInfoDto fileInfoDto) {
+        File metadata = createMetadataFromFileInfo(filePath, fileInfoDto, folderId);
         FileContent mediaContent = fileToFileContent(filePath);
-
         try {
-            File gdFile = drive.files()
+            return drive.files()
                     .create(metadata, mediaContent)
-                    .setFields("id")
+                    .setFields("id") //todo вынести используемые поля из драйва в ENUM
                     .execute();
-
-            System.out.println("File ID: " + gdFile.getId());
-
-            var fileInfo = createFileInfo(chatId, fileInfoDto, gdFile);
-            fileInfoService.saveFileInfo(fileInfo);
-
-            return gdFile;
         } catch (IOException e) {
             throw new DriveException(e);
         }
     }
 
     @Override
-    public String deleteFileById(String fileId) {
+    public java.io.File getFileById(String fileId) {
         try {
-            drive.files().delete(fileId).execute();
-            return "success";
-        } catch (IOException e) {
-            throw new DriveException(e);
-        }
-    }
-
-    @Override
-    public java.io.File searchFile(Long chatId, String query) {
-        var file = fileInfoService.searchAnyFile(chatId, query);
-
-        try {
-            var convFile = new java.io.File(System.getProperty("java.io.tmpdir"), file.getName());
+            var convFile = new java.io.File(System.getProperty("java.io.tmpdir"), fileId + System.currentTimeMillis()); //todo может быть есть варианты генерации имени лучше.
             try (var fileOutputStream = new FileOutputStream(convFile)) {
-                drive.files().get(file.getFileId()).executeMediaAndDownloadTo(fileOutputStream);
+                drive.files().get(fileId).executeMediaAndDownloadTo(fileOutputStream);
                 return convFile;
             }
-        } catch (IOException e) {
-            throw new DriveException(e);
-        }
-    }
-
-    @Override
-    public List<File> showAllFiles() {
-        try {
-            FileList result = drive.files().list()
-                    .setPageSize(100)
-                    .setFields("nextPageToken, files(owners, id, name, description, driveId, explicitlyTrashed, fileExtension, isAppAuthorized, kind, modifiedByMe, parents, permissionIds)")
-                    .execute();
-
-            List<File> files = result.getFiles();
-            logFiles(files);
-
-            return files;
         } catch (IOException e) {
             throw new DriveException(e);
         }
@@ -122,28 +71,6 @@ public class GoogleDriveService implements IGoogleDriveService {
         return new FileContent(fileMimeType, file);
     }
 
-    private void logFiles(List<File> files) {
-        if (files == null || files.isEmpty()) {
-            System.out.println("No files found.");
-        } else {
-            System.out.println("Files:");
-            for (File file : files) {
-                System.out.printf("%s (%s)\n", file.getName(), file.getId());
-            }
-        }
-    }
-
-    private FileInfo createFileInfo(long chatId, FileInfoDto fileInfoDto, File gdFile) {
-        FileInfo fileInfo = new FileInfo();
-        fileInfo.setName(fileInfoDto.name());
-        fileInfo.setDescription(fileInfoDto.description());
-        fileInfo.setSource(fileInfoDto.resource());
-        fileInfo.setFileId(gdFile.getId());
-        fileInfo.setUserId(fileInfoDto.userId());
-        fileInfo.setChatId(chatId);
-        return fileInfo;
-    }
-
     private File createMetadataFromFileInfo(java.io.File filePath, FileInfoDto fileInfoDto, String folderId) {
         var metadata = new File();
         metadata.setParents(Collections.singletonList(folderId));
@@ -154,4 +81,42 @@ public class GoogleDriveService implements IGoogleDriveService {
                         + fileInfoDto.resource());
         return metadata;
     }
+
+//    @Override
+//    public String deleteFileById(String fileId) {
+//        try {
+//            drive.files().delete(fileId).execute();
+//            return "success";
+//        } catch (IOException e) {
+//            throw new DriveException(e);
+//        }
+//    }
+
+//    @Override
+//    public List<File> showAllFiles() {
+//        try {
+//            FileList result = drive.files().list()
+//                    .setPageSize(100)
+//                    .setFields("nextPageToken, files(owners, id, name, description, driveId, explicitlyTrashed, fileExtension, isAppAuthorized, kind, modifiedByMe, parents, permissionIds)")
+//                    .execute();
+//
+//            List<File> files = result.getFiles();
+//            logFiles(files);
+//
+//            return files;
+//        } catch (IOException e) {
+//            throw new DriveException(e);
+//        }
+//    }
+
+//    private void logFiles(List<File> files) {
+//        if (files == null || files.isEmpty()) {
+//            System.out.println("No files found.");
+//        } else {
+//            System.out.println("Files:");
+//            for (File file : files) {
+//                System.out.printf("%s (%s)\n", file.getName(), file.getId());
+//            }
+//        }
+//    }
 }
