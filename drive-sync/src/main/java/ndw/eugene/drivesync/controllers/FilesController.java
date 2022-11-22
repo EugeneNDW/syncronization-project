@@ -32,9 +32,9 @@ public class FilesController {
         return uploadedFile.getId() + " " + uploadedFile.getName(); //todo подумать над респонсом
     }
 
-    @GetMapping
+    @GetMapping //todo сделать search controller (?)
     public FileSystemResource searchFile(@PathVariable("chatId") long chatId, @RequestParam("query") String query, HttpServletResponse response) {
-        var file = fileInfoService.searchAnyFile(chatId, query);
+        var file = fileInfoService.searchFile(chatId, query);
         response.setHeader("Content-Disposition", "filename=\"" + file.getName() + "\"");
         return new FileSystemResource(file);
     }

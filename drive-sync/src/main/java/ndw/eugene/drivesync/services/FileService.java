@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
-
 @Service
 @Transactional
 public class FileService implements IFileService {
@@ -44,28 +42,24 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public FileInfo getRandomHistoryFile(Long chatId) {
+    public java.io.File searchFile(Long chatId, String query) {
+        if (query.equals("history")) {
+            var fileInfo = getRandomHistoryFile(chatId);
+            var file = googleDriveService.getFileById(fileInfo.getFileId(), fileInfo.getName());
+
+            return file;
+        }
+
+        throw new IllegalArgumentException("service doesn't support this query yet!");
+    }
+
+    private FileInfo getRandomHistoryFile(Long chatId) {
         var file = fileInfoRepository.findRandomHistoryFile(chatId);
         if (file.isEmpty()) {
             throw new FileNotFoundException("history");
         }
 
         return file.get();
-    }
-
-    @Override
-    public java.io.File searchAnyFile(Long chatId, String query) {
-        if (query.equals("history")) {
-            var files = fileInfoRepository.findAllByChatIdAndDescription(chatId, query);
-            if (files.isEmpty()) {
-                throw new FileNotFoundException(query);
-            }
-            var fileInfo = files.get(new Random().nextInt(files.size()));
-
-            return googleDriveService.getFileById(fileInfo.getFileId());
-        }
-
-        throw new IllegalArgumentException("service doesn't support this query yet!");
     }
 
     private FileInfo createFileInfo(long chatId, FileInfoDto fileInfoDto, File gdFile) {
@@ -76,6 +70,7 @@ public class FileService implements IFileService {
         fileInfo.setFileId(gdFile.getId());
         fileInfo.setUserId(fileInfoDto.userId());
         fileInfo.setChatId(chatId);
+        fileInfo.setHistory(fileInfoDto.isHistory());
 
         return fileInfo;
     }

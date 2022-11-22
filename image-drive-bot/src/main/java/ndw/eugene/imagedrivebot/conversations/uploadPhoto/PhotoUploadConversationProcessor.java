@@ -118,10 +118,16 @@ public class PhotoUploadConversationProcessor {
 
     private void sendPhotos(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
         conversation.setTaskDone(true);
-        var results = fileService.synchronizeFiles(bot, update.chatId(), update.userId(), conversation.getDescription(), conversation.getDocuments());
+        var results = fileService.synchronizeFiles(
+                bot,
+                update.chatId(),
+                update.userId(),
+                conversation.getDescription(),
+                false,
+                conversation.getDocuments());
         var result = results
                 .stream()
-                .map( r -> r.fileName() + " : " + (r.successStatus() ? "успех" : "неуспех"))
+                .map(r -> r.fileName() + " : " + (r.successStatus() ? "успех" : "неуспех"))
                 .collect(Collectors.joining("\n", "Загружено: \n", ""));
 
         bot.sendMessageToChat(result, update.chatId());

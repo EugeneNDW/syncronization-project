@@ -11,7 +11,7 @@ import java.util.List;
 public interface IFileService {
     FilesSynchronizationResponse sendFileToDisk(long chatId, File fileToDisk, FileInfoDto fileInfo);
 
-    List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, String description, List<Document> documents);
+    List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, String description, boolean isHistory,  List<Document> documents);
 
     void renameChatFolder(long chatId, String newFolderName);
 

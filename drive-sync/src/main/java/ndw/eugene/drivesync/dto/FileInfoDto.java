@@ -4,5 +4,6 @@ public record FileInfoDto
         (Long userId,
          String name,
          String description,
-         String resource) {
+         String resource,
+         boolean isHistory) {
 }

@@ -52,7 +52,7 @@ public class FIleService implements IFileService {
     }
 
     @Override
-    public List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, String description, List<Document> documents) {
+    public List<FilesSynchronizationResponse> synchronizeFiles(DriveSyncBot bot, long chatId, long userId, String description, boolean isHistory, List<Document> documents) {
         return documents
                 .parallelStream()
                 .map(bot::downloadFile)
@@ -62,7 +62,8 @@ public class FIleService implements IFileService {
                                         userId,
                                         f.fileName(),
                                         description,
-                                        RESOURCE_NAME));
+                                        RESOURCE_NAME,
+                                        isHistory));
                             } else {
                                 return new FilesSynchronizationResponse(f.fileName(), false);
                             }

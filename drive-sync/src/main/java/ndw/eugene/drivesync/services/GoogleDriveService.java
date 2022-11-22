@@ -3,7 +3,6 @@ package ndw.eugene.drivesync.services;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
-import ndw.eugene.drivesync.data.entities.FileInfo;
 import ndw.eugene.drivesync.dto.FileInfoDto;
 import ndw.eugene.drivesync.exceptions.DriveException;
 import org.apache.tika.Tika;
@@ -15,7 +14,6 @@ import javax.transaction.Transactional;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 @Service
 @Transactional
@@ -46,9 +44,9 @@ public class GoogleDriveService implements IGoogleDriveService {
     }
 
     @Override
-    public java.io.File getFileById(String fileId) {
+    public java.io.File getFileById(String fileId, String fileName) {
         try {
-            var convFile = new java.io.File(System.getProperty("java.io.tmpdir"), fileId + System.currentTimeMillis()); //todo может быть есть варианты генерации имени лучше.
+            var convFile = new java.io.File(System.getProperty("java.io.tmpdir"), fileName); //todo может быть есть варианты генерации имени лучше.
             try (var fileOutputStream = new FileOutputStream(convFile)) {
                 drive.files().get(fileId).executeMediaAndDownloadTo(fileOutputStream);
                 return convFile;

@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FileInfoRepository extends CrudRepository<FileInfo, Long> {
-    List<FileInfo> findAllByChatIdAndDescription(Long chatId, String description);
-
-    @Query(value = "SELECT * FROM file_info WHERE chat_id = :chatId ORDER BY random() LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM file_info WHERE chat_id = :chatId AND is_history IS TRUE ORDER BY random() LIMIT 1;", nativeQuery = true)
     Optional<FileInfo> findRandomHistoryFile(@Param("chatId") Long chatId);
 }

@@ -10,7 +10,5 @@ public interface IFileService {
 
     FileInfo saveFileInfo(FileInfo fileInfo);
 
-    FileInfo getRandomHistoryFile(Long chatId);
-
-    File searchAnyFile(Long chatId, String query);
+    File searchFile(Long chatId, String query);
 }

@@ -61,7 +61,8 @@ public class SaveHistoryConversationProcessor {
         var results = fileService.synchronizeFiles(bot,
                 update.chatId(),
                 update.userId(),
-                HISTORY_TAG,
+                "",
+                true,
                 Collections.singletonList(update.document()));
 
         var messageText = results
