@@ -8,5 +8,7 @@ public interface IValidationService {
 
     boolean checkUpdateFromUser(Update update);
 
-    void checkUpdateHasDocument(FormattedUpdate update);
+    boolean checkUpdateIsTextMessage(FormattedUpdate update);
+
+    boolean checkUpdateHasDocument(FormattedUpdate update);
 }

@@ -3,8 +3,8 @@ package ndw.eugene.imagedrivebot.conversations.uploadPhoto;
 import ndw.eugene.imagedrivebot.DriveSyncBot;
 import ndw.eugene.imagedrivebot.configurations.BotCommand;
 import ndw.eugene.imagedrivebot.configurations.BotMessage;
-import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.conversations.UpdateProcessor;
+import ndw.eugene.imagedrivebot.dto.FormattedUpdate;
 import ndw.eugene.imagedrivebot.exceptions.DocumentNotFoundException;
 import ndw.eugene.imagedrivebot.services.IFileService;
 import ndw.eugene.imagedrivebot.services.IValidationService;
@@ -18,52 +18,21 @@ import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
+import static ndw.eugene.imagedrivebot.configurations.BotMessage.FAILURE_SYMBOL;
+import static ndw.eugene.imagedrivebot.configurations.BotMessage.SUCCESS_SYMBOL;
+
 @Component
 public class PhotoUploadConversationProcessor {
     private final int WAIT_FOR_UPDATES_LIMIT_IN_SEC = 30;
-
     @Autowired
     private final IFileService fileService;
-
+    @Autowired
+    private final TaskScheduler scheduler;
     @Autowired
     private IValidationService validationService;
 
-    @Autowired
-    private final TaskScheduler scheduler;
-
-    public PhotoUploadConversationProcessor(IFileService fileService, IValidationService validationService, TaskScheduler scheduler) {
-        this.fileService = fileService;
-        this.validationService = validationService;
-        this.scheduler = scheduler;
-    }
-
-    public void process(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
-        var processor = getStageProcessor(conversation.getCurrentStage());
-        processor.process(update, bot, conversation);
-        nextStage(conversation);
-    }
-
-    private void nextStage(PhotoUploadConversation conversation) {
-        var currentStage = conversation.getCurrentStage();
-        var isPhotoStage = currentStage == PhotoUploadStages.PHOTOS;
-
-        if (!isPhotoStage || conversation.isTaskDone()) {
-            conversation.nextStage();
-        }
-    }
-
-    private UpdateProcessor<PhotoUploadConversation> getStageProcessor(PhotoUploadStages currentStage) {
-        return switch (currentStage) {
-            case CONVERSATION_STARTED -> startProcessor;
-            case DESCRIPTION_PROVIDED -> descriptionProcessor;
-            case PHOTOS -> photosProcessor;
-            case ENDED -> endedProcessor;
-        };
-    }
-
     public final UpdateProcessor<PhotoUploadConversation> startProcessor = (update, bot, conversation) ->
             bot.sendMessageToChat(BotMessage.UPLOAD_START.getMessage(), update.chatId());
-
     public final UpdateProcessor<PhotoUploadConversation> descriptionProcessor = (update, bot, conversation) -> {
         var description = "";
         boolean skipDescription = Objects.equals(update.command(), BotCommand.SKIP_DESCRIPTION.getCommand());
@@ -76,7 +45,12 @@ public class PhotoUploadConversationProcessor {
     };
 
     public final UpdateProcessor<PhotoUploadConversation> photosProcessor = (update, bot, conversation) -> {
-        validationService.checkUpdateHasDocument(update);
+        if (validationService.checkUpdateIsTextMessage(update)) {
+            return;
+        }
+        if (!validationService.checkUpdateHasDocument(update)) {
+            throw new DocumentNotFoundException();
+        }
 
         var updateMediaGroup = update.mediaGroupId();
         var document = update.document();
@@ -109,6 +83,36 @@ public class PhotoUploadConversationProcessor {
         throw new IllegalArgumentException(BotMessage.CANT_REACH_EXCEPTION.getMessage());
     };
 
+    public PhotoUploadConversationProcessor(IFileService fileService, IValidationService validationService, TaskScheduler scheduler) {
+        this.fileService = fileService;
+        this.validationService = validationService;
+        this.scheduler = scheduler;
+    }
+
+    public void process(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
+        var processor = getStageProcessor(conversation.getCurrentStage());
+        processor.process(update, bot, conversation);
+        nextStage(conversation);
+    }
+
+    private void nextStage(PhotoUploadConversation conversation) {
+        var currentStage = conversation.getCurrentStage();
+        var isPhotoStage = currentStage == PhotoUploadStages.PHOTOS;
+
+        if (!isPhotoStage || conversation.isTaskDone()) {
+            conversation.nextStage();
+        }
+    }
+
+    private UpdateProcessor<PhotoUploadConversation> getStageProcessor(PhotoUploadStages currentStage) {
+        return switch (currentStage) {
+            case CONVERSATION_STARTED -> startProcessor;
+            case DESCRIPTION_PROVIDED -> descriptionProcessor;
+            case PHOTOS -> photosProcessor;
+            case ENDED -> endedProcessor;
+        };
+    }
+
     private ScheduledFuture<?> schedulePhotoUpload(FormattedUpdate update, DriveSyncBot bot, PhotoUploadConversation conversation) {
         return scheduler.schedule(
                 () -> sendPhotos(update, bot, conversation),
@@ -125,9 +129,10 @@ public class PhotoUploadConversationProcessor {
                 conversation.getDescription(),
                 false,
                 conversation.getDocuments());
+
         var result = results
                 .stream()
-                .map(r -> r.fileName() + " : " + (r.successStatus() ? "успех" : "неуспех"))
+                .map(r -> (r.successStatus() ? SUCCESS_SYMBOL.getMessage() : FAILURE_SYMBOL.getMessage()) + " " + r.fileName())
                 .collect(Collectors.joining("\n", "Загружено: \n", ""));
 
         bot.sendMessageToChat(result, update.chatId());

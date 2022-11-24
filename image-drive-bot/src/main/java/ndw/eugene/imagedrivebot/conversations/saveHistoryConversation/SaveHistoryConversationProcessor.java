@@ -13,16 +13,22 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import static ndw.eugene.imagedrivebot.configurations.BotMessage.FAILURE_SYMBOL;
+import static ndw.eugene.imagedrivebot.configurations.BotMessage.SUCCESS_SYMBOL;
+
 @Component
 public class SaveHistoryConversationProcessor {
-
-    private final String HISTORY_TAG = "history";
-
     @Autowired
     private final IFileService fileService;
-
     @Autowired
     private final IValidationService validationService;
+
+    public final UpdateProcessor<SaveHistoryConversation> startProcessor = (update, bot, conversation) ->
+            bot.sendMessageToChat(BotMessage.HISTORY_START.getMessage(), update.chatId());
+    public final UpdateProcessor<SaveHistoryConversation> documentProcessor = this::sendPhotos;
+    public final UpdateProcessor<SaveHistoryConversation> endedProcessor = (update, bot, conversation) -> {
+        throw new IllegalArgumentException(BotMessage.CANT_REACH_EXCEPTION.getMessage());
+    };
 
     public SaveHistoryConversationProcessor(IFileService fileService, IValidationService validationService) {
         this.fileService = fileService;
@@ -43,21 +49,18 @@ public class SaveHistoryConversationProcessor {
         };
     }
 
-    public final UpdateProcessor<SaveHistoryConversation> startProcessor = (update, bot, conversation) ->
-            bot.sendMessageToChat(BotMessage.HISTORY_START.getMessage(), update.chatId());
-
-    public final UpdateProcessor<SaveHistoryConversation> documentProcessor = this::sendPhotos;
-
-    public final UpdateProcessor<SaveHistoryConversation> endedProcessor = (update, bot, conversation) -> {
-        throw new IllegalArgumentException(BotMessage.CANT_REACH_EXCEPTION.getMessage());
-    };
-
     private void nextStage(SaveHistoryConversation conversation) {
         conversation.nextStage();
     }
 
     private void sendPhotos(FormattedUpdate update, DriveSyncBot bot, SaveHistoryConversation conversation) {
-        validationService.checkUpdateHasDocument(update);
+        if (validationService.checkUpdateIsTextMessage(update)) {
+            return;
+        }
+        if (!validationService.checkUpdateHasDocument(update)) {
+            throw new DocumentNotFoundException();
+        }
+
         var results = fileService.synchronizeFiles(bot,
                 update.chatId(),
                 update.userId(),
@@ -67,7 +70,9 @@ public class SaveHistoryConversationProcessor {
 
         var messageText = results
                 .stream()
-                .map( r -> r.fileName() + " " + (r.successStatus() ? "сохранён в истории" : "не был вписан в историю, попробуйте ещё раз"))
+                .map(r -> (r.successStatus() ? SUCCESS_SYMBOL.getMessage() : FAILURE_SYMBOL.getMessage()) + " "
+                        + r.fileName() + " "
+                        + (r.successStatus() ? "сохранён в истории" : "не был вписан в историю, попробуйте ещё раз"))
                 .collect(Collectors.joining(""));
 
         bot.sendMessageToChat(messageText, update.chatId());
