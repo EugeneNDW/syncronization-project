@@ -1,36 +1,31 @@
 package ndw.eugene.drivesync.services;
 
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.model.File;
 import com.google.common.base.Throwables;
 import ndw.eugene.drivesync.data.entities.DriveFolder;
 import ndw.eugene.drivesync.data.repositories.DriveFolderRepository;
 import ndw.eugene.drivesync.dto.CreateFolderDto;
 import ndw.eugene.drivesync.dto.RenameFolderDto;
-import ndw.eugene.drivesync.exceptions.DriveException;
 import ndw.eugene.drivesync.exceptions.FolderAlreadyExistsException;
 import ndw.eugene.drivesync.exceptions.FolderNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.sql.SQLException;
 
 @Service
 @Transactional
 public class FolderService implements IFolderService {
-    public final static String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
 
     @Autowired
     private final DriveFolderRepository driveFolderRepository;
 
     @Autowired
-    private final Drive drive;
+    private final IGoogleDriveService googleDriveService;
 
-    public FolderService(DriveFolderRepository driveFolderRepository, Drive drive) {
+    public FolderService(DriveFolderRepository driveFolderRepository, IGoogleDriveService googleDriveService) {
         this.driveFolderRepository = driveFolderRepository;
-        this.drive = drive;
+        this.googleDriveService = googleDriveService;
     }
 
     @Override
@@ -44,20 +39,16 @@ public class FolderService implements IFolderService {
     }
 
     @Override
-    public void renameFolder(Long chatId, RenameFolderDto renameFolderDto) throws IOException {
+    public void renameFolder(Long chatId, RenameFolderDto renameFolderDto) {
         var folder = getFolderByChatId(chatId);
-
         folder.setTitle(renameFolderDto.newName());
-        String folderId = folder.getFolderId();
-        File file = new File().setName(renameFolderDto.newName());
-        drive.files()
-                .update(folderId, file)
-                .execute();
+
+        googleDriveService.renameFolder(folder.getFolderId(), renameFolderDto.newName()); //todo проблемы с транзакциями
     }
 
     @Override
     public DriveFolder createFolder(long chatId, CreateFolderDto createFolderDto) {
-        var folderId = createDriveFolder(createFolderDto.folderName());
+        var folderId = googleDriveService.createFolder(createFolderDto.folderName()); //todo проблемы с транзакциями
 
         DriveFolder folder = new DriveFolder();
         folder.setTitle(createFolderDto.folderName());
@@ -74,19 +65,6 @@ public class FolderService implements IFolderService {
                 }
             }
             throw new RuntimeException(); //todo что кидать?
-        }
-    }
-
-    private String createDriveFolder(String name) {
-        File folder = new File();
-        folder.setName(name);
-        folder.setMimeType(FOLDER_MIME_TYPE);
-
-        try {
-            var createdFolder = drive.files().create(folder).execute();
-            return createdFolder.getId();
-        } catch (IOException e) {
-            throw new DriveException(e);
         }
     }
 }

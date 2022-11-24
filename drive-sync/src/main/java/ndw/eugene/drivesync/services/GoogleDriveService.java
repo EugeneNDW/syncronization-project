@@ -18,6 +18,9 @@ import java.util.Collections;
 @Service
 @Transactional
 public class GoogleDriveService implements IGoogleDriveService {
+
+    public final static String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+
     @Autowired
     private final Drive drive;
 
@@ -31,8 +34,8 @@ public class GoogleDriveService implements IGoogleDriveService {
 
     @Override
     public File uploadFIle(String folderId, java.io.File filePath, FileInfoDto fileInfoDto) {
-        File metadata = createMetadataFromFileInfo(filePath, fileInfoDto, folderId);
-        FileContent mediaContent = fileToFileContent(filePath);
+        var metadata = createMetadataFromFileInfo(filePath, fileInfoDto, folderId);
+        var mediaContent = fileToFileContent(filePath);
         try {
             return drive.files()
                     .create(metadata, mediaContent)
@@ -56,6 +59,32 @@ public class GoogleDriveService implements IGoogleDriveService {
         }
     }
 
+    @Override
+    public String createFolder(String name) {
+        File folder = new File();
+        folder.setName(name);
+        folder.setMimeType(FOLDER_MIME_TYPE);
+
+        try {
+            var createdFolder = drive.files().create(folder).execute();
+            return createdFolder.getId();
+        } catch (IOException e) {
+            throw new DriveException(e);
+        }
+    }
+
+    @Override
+    public void renameFolder(String folderId, String newName) {
+        File file = new File().setName(newName);
+        try {
+            drive.files()
+                    .update(folderId, file)
+                    .execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String detectMimeType(java.io.File file) {
         try {
             return tika.detect(file);
@@ -65,56 +94,18 @@ public class GoogleDriveService implements IGoogleDriveService {
     }
 
     private FileContent fileToFileContent(@NonNull java.io.File file) {
-        String fileMimeType = detectMimeType(file);
+        var fileMimeType = detectMimeType(file);
         return new FileContent(fileMimeType, file);
     }
 
     private File createMetadataFromFileInfo(java.io.File filePath, FileInfoDto fileInfoDto, String folderId) {
         var metadata = new File();
         metadata.setParents(Collections.singletonList(folderId));
-        metadata.setName(filePath.getName());
+        metadata.setName(fileInfoDto.name());
         metadata.setDescription(
                 fileInfoDto.name() + " "
                         + fileInfoDto.description() + " "
                         + fileInfoDto.resource());
         return metadata;
     }
-
-//    @Override
-//    public String deleteFileById(String fileId) {
-//        try {
-//            drive.files().delete(fileId).execute();
-//            return "success";
-//        } catch (IOException e) {
-//            throw new DriveException(e);
-//        }
-//    }
-
-//    @Override
-//    public List<File> showAllFiles() {
-//        try {
-//            FileList result = drive.files().list()
-//                    .setPageSize(100)
-//                    .setFields("nextPageToken, files(owners, id, name, description, driveId, explicitlyTrashed, fileExtension, isAppAuthorized, kind, modifiedByMe, parents, permissionIds)")
-//                    .execute();
-//
-//            List<File> files = result.getFiles();
-//            logFiles(files);
-//
-//            return files;
-//        } catch (IOException e) {
-//            throw new DriveException(e);
-//        }
-//    }
-
-//    private void logFiles(List<File> files) {
-//        if (files == null || files.isEmpty()) {
-//            System.out.println("No files found.");
-//        } else {
-//            System.out.println("Files:");
-//            for (File file : files) {
-//                System.out.printf("%s (%s)\n", file.getName(), file.getId());
-//            }
-//        }
-//    }
 }

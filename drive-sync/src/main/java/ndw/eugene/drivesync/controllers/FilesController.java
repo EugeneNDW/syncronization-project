@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 
 @RestController
@@ -32,16 +33,16 @@ public class FilesController {
         return uploadedFile.getId() + " " + uploadedFile.getName(); //todo подумать над респонсом
     }
 
-    @GetMapping //todo сделать search controller (?)
+    @GetMapping
     public FileSystemResource searchFile(@PathVariable("chatId") long chatId, @RequestParam("query") String query, HttpServletResponse response) {
         var file = fileInfoService.searchFile(chatId, query);
         response.setHeader("Content-Disposition", "filename=\"" + file.getName() + "\"");
         return new FileSystemResource(file);
     }
 
-    private java.io.File multipartToFile(MultipartFile file, String fileName) throws IOException { //todo в хэлпер
-        var convFile = new java.io.File(System.getProperty("java.io.tmpdir"), fileName);
-        file.transferTo(convFile);
-        return convFile;
+    private java.io.File multipartToFile(MultipartFile file, String fileName) throws IOException {
+        var tmpFile = File.createTempFile("tmp", fileName);
+        file.transferTo(tmpFile);
+        return tmpFile;
     }
 }

@@ -6,8 +6,6 @@ import ndw.eugene.drivesync.services.IFolderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-
 @RequestMapping("/{chatId}/folders")
 @RestController
 public class FoldersController {
@@ -20,12 +18,12 @@ public class FoldersController {
     }
 
     @PostMapping("/name")
-    public void renameFolder(@PathVariable("chatId") long chatId, @RequestBody RenameFolderDto renameFolderDto) throws IOException { //todo убрать эксепшны
+    public void renameFolder(@PathVariable("chatId") long chatId, @RequestBody RenameFolderDto renameFolderDto) {
         folderService.renameFolder(chatId, renameFolderDto);
     }
 
     @PostMapping
-    public void createFolder(@PathVariable("chatId") long chatId, @RequestBody CreateFolderDto createFolderDto) throws IOException {
+    public void createFolder(@PathVariable("chatId") long chatId, @RequestBody CreateFolderDto createFolderDto) {
         folderService.createFolder(chatId, createFolderDto);
     }
 }
