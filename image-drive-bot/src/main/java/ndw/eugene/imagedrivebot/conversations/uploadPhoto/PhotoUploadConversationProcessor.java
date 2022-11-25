@@ -40,7 +40,7 @@ public class PhotoUploadConversationProcessor {
             description = update.messageTextIsNotEmpty() ? update.messageText() : "";
         }
 
-        conversation.setDescription(description + " " + update.userId());
+        conversation.setDescription(description);
         bot.sendMessageToChat(BotMessage.DESCRIPTION_SAVED.getMessage(), update.chatId());
     };
 

@@ -1,5 +1,7 @@
 package ndw.eugene.drivesync.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -27,14 +29,18 @@ public class GoogleDriveService implements IGoogleDriveService {
     @Autowired
     private final Tika tika;
 
-    public GoogleDriveService(final Drive drive, final Tika tika) {
+    @Autowired
+    private final ObjectMapper objectMapper;
+
+    public GoogleDriveService(final Drive drive, final Tika tika, ObjectMapper objectMapper) {
         this.drive = drive;
         this.tika = tika;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public File uploadFIle(String folderId, java.io.File filePath, FileInfoDto fileInfoDto) {
-        var metadata = createMetadataFromFileInfo(filePath, fileInfoDto, folderId);
+        var metadata = createMetadataFromFileInfo(fileInfoDto, folderId);
         var mediaContent = fileToFileContent(filePath);
         try {
             return drive.files()
@@ -98,14 +104,21 @@ public class GoogleDriveService implements IGoogleDriveService {
         return new FileContent(fileMimeType, file);
     }
 
-    private File createMetadataFromFileInfo(java.io.File filePath, FileInfoDto fileInfoDto, String folderId) {
+    private File createMetadataFromFileInfo(FileInfoDto fileInfoDto, String folderId) {
         var metadata = new File();
         metadata.setParents(Collections.singletonList(folderId));
         metadata.setName(fileInfoDto.name());
-        metadata.setDescription(
-                fileInfoDto.name() + " "
-                        + fileInfoDto.description() + " "
-                        + fileInfoDto.resource());
+
+
+        metadata.setDescription(objectToJSON(fileInfoDto));
         return metadata;
+    }
+
+    private String objectToJSON(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e); //todo custom exception
+        }
     }
 }
